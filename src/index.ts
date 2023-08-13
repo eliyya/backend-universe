@@ -1,13 +1,17 @@
+import { Application, Router } from "https://deno.land/x/oak@v12.6.0/mod.ts";
+import { oakCors } from "https://deno.land/x/cors@v1.2.2/mod.ts";
 import "https://deno.land/x/dotenv@v3.2.2/load.ts";
-import { Application } from "https://deno.land/x/oak@v12.6.0/mod.ts";
-import { join } from "https://deno.land/std@0.193.0/path/mod.ts";
-import {loadRouters} from './utils.ts'
-import { oakCors } from "https://deno.land/x/cors/mod.ts";
+import auth from './routes/auth.routes.ts'
+import api from './routes/api.routes.ts'
 
 const app = new Application();
 app.use(oakCors({ origin: "*" }));
 // router handler
-await loadRouters(join(Deno.cwd(), "src","routes"), app)
+const router = new Router();
+router.use("/auth", auth.routes(), auth.allowedMethods());
+router.use("/api", api.routes(), api.allowedMethods());
+app.use(router.routes());
+app.use(router.allowedMethods());
 
 await app.listen({ port: 8000 });
 console.log("Server running on port http://localhost:8000");
