@@ -3,6 +3,7 @@ import User from "../../models/User.ts";
 
 export default new Router()
     .get('/@me', async (ctx) => {
+        ctx.response.headers.set("Access-Control-Allow-Origin", "*");
         const token = ctx.request.headers.get('Authorization')?.split(' ')[1];
         if (!token) {
             ctx.response.status = 401;
