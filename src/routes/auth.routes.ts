@@ -8,6 +8,7 @@ const router = new Router();
 
 router
   .post("/authorize", async (ctx) => {
+    ctx.response.headers.set("Access-Control-Allow-Origin", "*");
     // revisamos si existe un body
     if (!ctx.request.hasBody) {
       ctx.response.status = 400;
