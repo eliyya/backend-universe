@@ -13,5 +13,5 @@ router.use("/api", api.routes(), api.allowedMethods());
 app.use(router.routes());
 app.use(router.allowedMethods());
 
-await app.listen({ port: 8000 });
 console.log("Server running on port http://localhost:8000");
+await app.listen({ port: 8000 });
