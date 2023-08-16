@@ -8,7 +8,6 @@ const router = new Router();
 
 router
   .post("/authorize", async (ctx) => {
-    ctx.response.headers.set("Access-Control-Allow-Origin", "*");
     // revisamos si existe un body
     if (!ctx.request.hasBody) {
       ctx.response.status = 400;
@@ -23,11 +22,6 @@ router
       return;
     }
     ctx.response.body = token;
-  })  
-  .options("/authorize", (ctx) => {
-    ctx.response.headers.set("Access-Control-Allow-Origin", "*");
-    ctx.response.headers.set("Access-Control-Allow-Methods", "POST");
-    ctx.response.status = 200;
   })
 
 export default router;
