@@ -1,8 +1,8 @@
 import { z } from "https://deno.land/x/zod@v3.21.4/mod.ts";
 import { compare } from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
-// import { create } from "https://deno.land/x/djwt@v2.9.1/mod.ts";
-import { sign, verify } from "npm:jsonwebtoken";
+import { SignJWT, jwtVerify } from 'https://deno.land/x/jose@v4.14.4/index.ts'
 
+const secret = new TextEncoder().encode(Deno.env.get("JWT_SECRET") as string)
 import supabase from "../supabase.ts";
 import { Table } from "../database.types.ts";
 
@@ -27,18 +27,16 @@ export default class User {
     const user = User.schema.safeParse(u)
     if (!user.success) throw new Error(JSON.stringify(user.error));
     const expires = Date.now() + 60 * 60 * 24;
-    const token = sign({ user: user.data, expires }, Deno.env.get("JWT_SECRET") as string);
-    return {
-      token,
-      expires,
-    };
+    const token = await new SignJWT({ user: user.data, expires })
+      .setProtectedHeader({ alg: 'HS256' })
+      .sign(secret)
+    return { token, expires };
   }
 
-  // deno-lint-ignore require-await
   static async decodeToken(token: string) {
     try {
-        const data = verify(token, Deno.env.get("JWT_SECRET") as string);
-        const {user, expires} = data as {user: Omit<Table<'users'>, 'password'>, expires: number};
+        const { payload } = await jwtVerify(token, secret);
+        const {user, expires} = payload as {user: Omit<Table<'users'>, 'password'>, expires: number};
         if (expires < Date.now()) return { error: "Token expired" };
         return { user };
     } catch (error) {
