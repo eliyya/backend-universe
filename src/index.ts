@@ -5,13 +5,12 @@ import auth from './routes/auth.routes.ts'
 import api from './routes/api.routes.ts'
 
 const app = new Application();
-app.use(oakCors({ origin: "*" }));
+app.use(oakCors());
 // router handler
 const router = new Router();
 router.use("/auth", auth.routes(), auth.allowedMethods());
 router.use("/api", api.routes(), api.allowedMethods());
 app.use(router.routes());
-app.use(router.allowedMethods());
 
 await app.listen({ port: 8000 });
 console.log("Server running on port http://localhost:8000");
