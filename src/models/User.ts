@@ -59,7 +59,7 @@ export default class User {
       username: email.split("@")[0],
     }])
     console.log(r);
-    const { data, error } = supabase.from("users").select().eq("email", email);
+    const { data, error } = await supabase.from("users").select().eq("email", email);
     console.log('?', {error, data});
     
     if (error) return { error };
