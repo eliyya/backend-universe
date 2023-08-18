@@ -48,6 +48,7 @@ export default class User {
     const parsedEmail = z.string().email().safeParse(email)
     if (!parsedEmail.success) return { error: "Invalid email" };
     const req = await supabase.from("users").select().eq("email", email);
+    console.log(req)
     if (req.status !== 200) throw new Error(JSON.stringify(req));
     if (req.data?.length) return { error: "User already exists" };
     const { data, error } = await supabase.from("users").insert([{
