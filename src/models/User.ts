@@ -56,6 +56,8 @@ export default class User {
       password: await hash(`${password}`),
       username: email.split("@")[0],
     }]).select()
+    console.log('?', error);
+    
     if (error) return { error };
     const [u] = data;
     const user = User.schema.safeParse(u)
