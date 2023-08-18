@@ -50,15 +50,17 @@ export default class User {
     const req = await supabase.from("users").select().eq("email", email);
     console.log(req)
     if (req.error) throw new Error(JSON.stringify(req.error));
-    console.log(req.length);    
+    console.log(req.data.length);    
     if (req.data.length) return { error: "User already exists" };
     console.log('ok');    
-    const { data, error } = await supabase.from("users").insert([{
+    const r = await supabase.from("users").insert([{
       email: parsedEmail.data,
       password: await hash(`${password}`),
       username: email.split("@")[0],
-    }]).select()
-    console.log('?', error);
+    }])
+    console.log(r);
+    const { data, error } = supabase.from("users").select().eq("email", email);
+    console.log('?', {error, data});
     
     if (error) return { error };
     const [u] = data;
