@@ -1,5 +1,5 @@
 import { z } from "https://deno.land/x/zod@v3.21.4/mod.ts";
-import { compare } from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
+import { compare, hash } from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
 import { SignJWT, jwtVerify } from 'https://deno.land/x/jose@v4.14.4/index.ts'
 
 const secret = new TextEncoder().encode(Deno.env.get("JWT_SECRET") as string)
@@ -42,5 +42,22 @@ export default class User {
     } catch (error) {
         return { error: error.message };
     }
+  }
+
+  static async register(email: string, password: string) {
+    const parsedEmail = z.string().email().safeParse(email)
+    if (!parsedEmail.success) return { error: "Invalid email" };
+    const req = await supabase.from("users").select().eq("email", email);
+    if (req.status !== 200) throw new Error(JSON.stringify(req));
+    if (req.data?.length) return { error: "User already exists" };
+    const { data, error } = await supabase.from("users").insert({
+      email: parsedEmail.data,
+      password: await hash(`${password}`),
+      username: email.split("@")[0],
+    }).select()
+    if (error) return { error };
+    const [u] = data;
+    const user = User.schema.safeParse(u)
+    return { user };
   }
 }

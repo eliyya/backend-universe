@@ -17,3 +17,29 @@ export default new Router()
         }
         ctx.response.body = data.user;
     })
+    .post('/', async (ctx) => {
+        if (!ctx.request.hasBody) {
+            ctx.response.status = 400;
+            ctx.response.body = { message: 'Invalid user data' };
+            return;
+        }
+        const { user, password } = await ctx.request.body({ type: 'json' }).value ?? {};
+        if (!user || !password) {
+            ctx.response.status = 400;
+            ctx.response.body = { message: 'Invalid user data' };
+            return;
+        }
+        try {
+            ctx.response.body = await User.register(user, password)
+        } catch (error) {
+            ctx.response.status = 400;
+            ctx.response.body = { message: error.message };
+            return;
+        }
+    })
+
+    
+
+
+
+    
