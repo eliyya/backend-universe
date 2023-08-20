@@ -49,16 +49,16 @@ export default class User {
     if (!parsedEmail.success) return { error: "Invalid email" };
     const req = await userTable.items().get('email', email)
     console.log(req)
-    if (req.error) throw new Error(JSON.stringify(req.error));
-    console.log(req.data.length);    
-    if (req.data.length) return { error: "User already exists" };
+    // if (req.error) throw new Error(JSON.stringify(req.error));
+    // console.log(req.data.length);    
+    if (req.length) return { error: "User already exists" };
     console.log('ok');    
     const r = await userTable.items().add({
       email: parsedEmail.data,
       password: await hash(`${password}`),
       username: email.split("@")[0],
     })
-    console.log(r);
+    console.log('r', r);
     const { data, error } = await userTable.items().get("email", email);
     console.log('?', {error, data});
     
