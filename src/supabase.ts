@@ -1,10 +1,10 @@
-// import { Database } from "./database.types.ts";
+import { Database } from "./database.types.ts";
 
-class Table {
-  client: Supabase
+class Table<T> {
+  client: Supabase<T>
   name: string
   query = new URLSearchParams()
-  constructor(client: Supabase, name: string) {
+  constructor(client: Supabase<T>, name: string) {
     this.client = client
     this.name = name
   }
@@ -25,9 +25,21 @@ class Table {
     }).then((res) => res.json())
     return req
   }
+
+  async insert(data: unknown) {
+    const req = await fetch(`${this.client.url}/rest/v1/${this.name}`, {
+      method: "POST",
+      headers: {
+        apikey: this.client.key,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    }).then((res) => res.json())
+    return req
+  }
 }
 
-class Supabase {
+class Supabase<T> {
   url: string
   key: string
   constructor(url: string, key: string) {
@@ -40,4 +52,4 @@ class Supabase {
   }
 }
 
-export default new Supabase(Deno.env.get("SUPABASE_URL") as string, Deno.env.get("SUPABASE_PUBLIC_KEY") as string)
+export default new Supabase<Database>(Deno.env.get("SUPABASE_URL") as string, Deno.env.get("SUPABASE_PUBLIC_KEY") as string)
