@@ -1,22 +1,23 @@
 import { Database } from "./database.types.ts";
 
-class Table<T> {
+class Table<T extends Database, K extends keyof T['public']['Tables']> {
   client: Supabase<T>
-  name: string
+  name: K
   query = new URLSearchParams()
-  constructor(client: Supabase<T>, name: string) {
+
+  constructor(client: Supabase<T>, name: K) {
     this.client = client
     this.name = name
   }
 
-  eq(match: string, value: string) {
-    this.query.append(match, `eq.${value}`)
+  eq<U extends keyof T['public']['Tables'][K]>(match: U, value: T['public']['Tables'][K][U]) {
+    this.query.append(String(match), `eq.${value}`)
     return this
   }
 
-  async select(columns = "*") {
+  async select(columns = "*"): Promise<Array<Partial<T['public']['Tables'][K]>>> {
     this.query.append("select", columns)
-    const req = await fetch(`${this.client.url}/rest/v1/${this.name}?${this.query.toString()}`, {
+    const req = await fetch(`${this.client.url}/rest/v1/${String(this.name)}?${this.query.toString()}`, {
       method: "GET",
       headers: {
         apikey: this.client.key,
@@ -26,8 +27,8 @@ class Table<T> {
     return req
   }
 
-  async insert(data: unknown) {
-    const req = await fetch(`${this.client.url}/rest/v1/${this.name}`, {
+  async insert(data: Partial<T['public']['Tables'][K]> | Array<Partial<T['public']['Tables'][K]>>): Promise<Partial<T['public']['Tables'][K]>> {
+    const req = await fetch(`${this.client.url}/rest/v1/${String(this.name)}`, {
       method: "POST",
       headers: {
         apikey: this.client.key,
@@ -39,7 +40,7 @@ class Table<T> {
   }
 }
 
-class Supabase<T> {
+class Supabase<T extends Database> {
   url: string
   key: string
   constructor(url: string, key: string) {
@@ -47,7 +48,7 @@ class Supabase<T> {
     this.key = key
   }
 
-  from(name: string) {
+  from<K extends keyof T['public']['Tables']>(name: K) {
     return new Table(this, name)
   }
 }
