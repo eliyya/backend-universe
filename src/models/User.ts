@@ -5,7 +5,6 @@ import { SignJWT, jwtVerify } from 'https://deno.land/x/jose@v4.14.4/index.ts'
 const secret = new TextEncoder().encode(Deno.env.get("JWT_SECRET") as string)
 import supabase from "../supabase.ts";
 import { Table } from "../database.types.ts";
-const userTable = supabase.tables().get('users')
 export default class User {
   static schema = z.object({
     id: z.string().uuid(),
@@ -17,7 +16,7 @@ export default class User {
   });
 
   static async generateToken(email: string, password: string) {
-    const req = await userTable.items().get('email', email);
+    const req = await supabase.from("users").eq("email", email).select();
     if (req.status !== 200) throw new Error(JSON.stringify(req));
     if (!req.data?.length) return { error: "Invalid user or password" };
     const [u] = req.data;
@@ -44,27 +43,25 @@ export default class User {
     }
   }
 
-  static async register(email: string, password: string) {
+  static async register(email: string, _password: string) {
     const parsedEmail = z.string().email().safeParse(email)
     if (!parsedEmail.success) return { error: "Invalid email" };
-    const req = await userTable.items().get('email', email)
+    const req = await supabase.from('users').eq('email', email).select()
     console.log(req)
-    // if (req.error) throw new Error(JSON.stringify(req.error));
-    // console.log(req.data.length);    
     if (req.length) return { error: "User already exists" };
     console.log('ok');    
-    const r = await userTable.items().add({
-      email: parsedEmail.data,
-      password: await hash(`${password}`),
-      username: email.split("@")[0],
-    })
-    console.log('r', r);
-    const { data, error } = await userTable.items().get("email", email);
-    console.log('?', {error, data});
+    // const r = await supabase.from('users').add({
+    //   email: parsedEmail.data,
+    //   password: await hash(`${password}`),
+    //   username: email.split("@")[0],
+    // })
+    // console.log('r', r);
+    // const { data, error } = await supabase.from("users").eq("email", email).select();
+    // console.log('?', {error, data});
     
-    if (error) return { error };
-    const [u] = data;
-    const user = User.schema.safeParse(u)
-    return { user };
+    // if (error) return { error };
+    // const [u] = data;
+    // const user = User.schema.safeParse(u)
+    // return { user };
   }
 }
