@@ -55,7 +55,7 @@ export default class User {
       email: parsedEmail.data,
       password: await hash(`${password}`),
       username: email.split("@")[0],
-    }).select();
+    })
     console.log('r', r);
     // const { data, error } = await supabase.from("users").eq("email", email).select();
     // console.log('?', {error, data});
