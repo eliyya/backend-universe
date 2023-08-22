@@ -16,7 +16,7 @@ export default class User {
   });
 
   static async generateToken(email: string, password: string) {
-    const req = await supabase.from("users").eq("email", email).select();
+    const req = await supabase.from("users").select().eq("email", email);
     if (req.status !== 200) throw new Error(JSON.stringify(req));
     if (!req.data?.length) return { error: "Invalid user or password" };
     const [u] = req.data;
@@ -46,9 +46,10 @@ export default class User {
   static async register(email: string, password: string) {
     const parsedEmail = z.string().email().safeParse(email)
     if (!parsedEmail.success) return { error: "Invalid email" };
-    const req = await supabase.from('users').eq('', email).select()
+    const req = await supabase.from('users').select().eq('', email)
     console.log(req)
-    if (req.length) return { error: "User already exists" };
+    if (req.status !== 200) return { error: "Invalid user or password" };
+    if (req.data?.length) return { error: "User already exists" };
     console.log('ok');
     const r = await supabase.from('users').insert({
       email: parsedEmail.data,
@@ -61,7 +62,7 @@ export default class User {
     
     // if (error) return { error };
     // const [u] = data;
-    // const user = User.schema.safeParse(u)
+    // const user = await User.schema.safeParse(u)
     // return { user };
   }
 }

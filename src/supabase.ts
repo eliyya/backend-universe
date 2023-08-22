@@ -1,56 +1,64 @@
 import { Database } from "./database.types.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.32.0";
 
-class Table<T extends Database, K extends keyof T['public']['Tables']> {
-  client: Supabase<T>
-  name: K
-  query = new URLSearchParams()
+export default createClient<Database>(
+  Deno.env.get("SUPABASE_URL") as string,
+  Deno.env.get("SUPABASE_PUBLIC_KEY") as string,
+)
 
-  constructor(client: Supabase<T>, name: K) {
-    this.client = client
-    this.name = name
-  }
+ 
 
-  eq<U extends keyof T['public']['Tables'][K]>(match: U, value: T['public']['Tables'][K][U]) {
-    this.query.append(String(match), `eq.${value}`)
-    return this
-  }
+// class Table<T extends Database, K extends keyof T['public']['Tables']> {
+//   client: Supabase<T>
+//   name: K
+//   query = new URLSearchParams()
 
-  async select(columns = "*"): Promise<Array<Partial<T['public']['Tables'][K]>>> {
-    this.query.append("select", columns)
-    const req = await fetch(`${this.client.url}/rest/v1/${String(this.name)}?${this.query.toString()}`, {
-      method: "GET",
-      headers: {
-        apikey: this.client.key,
-        "Content-Type": "application/json",
-      },
-    }).then((res) => res.json())
-    return req
-  }
+//   constructor(client: Supabase<T>, name: K) {
+//     this.client = client
+//     this.name = name
+//   }
 
-  async insert(data: Partial<T['public']['Tables'][K]> | Array<Partial<T['public']['Tables'][K]>>): Promise<Partial<T['public']['Tables'][K]>> {
-    const req = await fetch(`${this.client.url}/rest/v1/${String(this.name)}`, {
-      method: "POST",
-      headers: {
-        apikey: this.client.key,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    }).then((res) => res.json())
-    return req
-  }
-}
+//   eq<U extends keyof T['public']['Tables'][K]>(match: U, value: T['public']['Tables'][K][U]) {
+//     this.query.append(String(match), `eq.${value}`)
+//     return this
+//   }
 
-class Supabase<T extends Database> {
-  url: string
-  key: string
-  constructor(url: string, key: string) {
-    this.url = url
-    this.key = key
-  }
+//   async select(columns = "*"): Promise<Array<Partial<T['public']['Tables'][K]>>> {
+//     this.query.append("select", columns)
+//     const req = await fetch(`${this.client.url}/rest/v1/${String(this.name)}?${this.query.toString()}`, {
+//       method: "GET",
+//       headers: {
+//         apikey: this.client.key,
+//         "Content-Type": "application/json",
+//       },
+//     }).then((res) => res.json())
+//     return req
+//   }
 
-  from<K extends keyof T['public']['Tables']>(name: K) {
-    return new Table(this, name)
-  }
-}
+//   async insert(data: Partial<T['public']['Tables'][K]> | Array<Partial<T['public']['Tables'][K]>>): Promise<Partial<T['public']['Tables'][K]>> {
+//     const req = await fetch(`${this.client.url}/rest/v1/${String(this.name)}`, {
+//       method: "POST",
+//       headers: {
+//         apikey: this.client.key,
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify(data),
+//     }).then((res) => res.json())
+//     return req
+//   }
+// }
 
-export default new Supabase<Database>(Deno.env.get("SUPABASE_URL") as string, Deno.env.get("SUPABASE_PUBLIC_KEY") as string)
+// class Supabase<T extends Database> {
+//   url: string
+//   key: string
+//   constructor(url: string, key: string) {
+//     this.url = url
+//     this.key = key
+//   }
+
+//   from<K extends keyof T['public']['Tables']>(name: K) {
+//     return new Table(this, name)
+//   }
+// }
+
+// export default new Supabase<Database>(Deno.env.get("SUPABASE_URL") as string, Deno.env.get("SUPABASE_PUBLIC_KEY") as string)
