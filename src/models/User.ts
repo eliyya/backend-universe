@@ -46,36 +46,30 @@ export default class User {
   static async register(email: string, password: string) {
     const parsedEmail = z.string().email().safeParse(email)
     if (!parsedEmail.success) return { error: "Invalid email" };
-    const req = await supabase.from('usuarios').select().eq('email', email)
-    console.log(req)
-    if (req.status !== 200) return { error: req.error?.message || "Unknown error" };
-    if (req.data?.length) return { error: "User already exists" };
     console.log('ok');
-    //     const r = await fetch(`${Deno.env.get("SUPABASE_URL")}/rest/v1/users`, {
-    //   method: "POST",
-    //   headers: {
-    //     apikey: Deno.env.get("SUPABASE_PUBLIC_KEY") as string,
-    //    "Authorization": `Bearer ${Deno.env.get("SUPABASE_PUBLIC_KEY")}`,
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify({
-    //     email: parsedEmail.data,
-    //     password: await hash(`${password}`),
-    //     username: email.split("@")[0],
-    //   }),
-    // }).then((res) => res.json())
-    const r = await supabase.from('usuarios').upsert({
+    const { data, error } = await supabase.from('usuarios').insert({
       email: parsedEmail.data,
       password: await hash(`${password}`),
-      username: email.split("@")[0],
-    })
-    console.log('r', r);
-    // const { data, error } = await supabase.from("users").eq("email", email).select();
-    // console.log('?', {error, data});
-    
-    // if (error) return { error };
-    // const [u] = data;
-    // const user = await User.schema.safeParse(u)
-    // return { user };
+      username: await getDisponibility(email.split("@")[0]),
+    }).select();
+    if (error?.message.includes('duplicate key value violates unique constraint "users_email_key"'))
+      return { error: "Email already registered" };     
+    if (error) return { error };    
+    const [u] = data;
+    const user = User.schema.safeParse(u)
+    if (!user.success) throw new Error(JSON.stringify(user.error));
+    return { user: user.data };
   }
+}
+
+async function getDisponibility(username: string) {
+  const users = await supabase.from('usuarios').select('username').like('username', `${username}`)
+  if (users.error) throw new Error(users.error.message);
+  if (users.data.length == 0) return username;
+  const userlist = users.data.map((u: {username:string}) => u.username);
+  const next = (num: number): string => {
+    if (userlist.includes(`${username}${num}`)) return next(num+1);
+    return `${username}${num}`;
+  };
+  return next(1);
 }

@@ -30,7 +30,9 @@ export default new Router()
             return;
         }
         try {
-            ctx.response.body = await User.register(user, password)
+            const d = await User.register(user, password)
+            if (d.error) throw new Error(d.error);
+            ctx.response.body = d.user
         } catch (error) {
             ctx.response.status = 400;
             ctx.response.body = { message: error.message };

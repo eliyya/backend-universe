@@ -1,6 +1,6 @@
+import "https://deno.land/std@0.199.0/dotenv/load.ts";
 import { Application, Router } from "https://deno.land/x/oak@v12.6.0/mod.ts";
 import { oakCors } from "https://deno.land/x/cors@v1.2.2/mod.ts";
-import "https://deno.land/x/dotenv@v3.2.2/load.ts";
 import auth from './routes/auth.routes.ts'
 import api from './routes/api.routes.ts'
 
