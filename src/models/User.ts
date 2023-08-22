@@ -64,7 +64,7 @@ export default class User {
     //     username: email.split("@")[0],
     //   }),
     // }).then((res) => res.json())
-    const r = await supabase.from('usuarios').insert({
+    const r = await supabase.from('usuarios').upsert({
       email: parsedEmail.data,
       password: await hash(`${password}`),
       username: email.split("@")[0],
