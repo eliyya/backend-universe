@@ -6,9 +6,9 @@ export default createClient<Database>(
   Deno.env.get("SERVICE_KEY") as string,
   {
     auth: {
-       persistSession: false,
-       debug: true,
-       autoRefreshToken: false,
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false  
     },
   }
 )
