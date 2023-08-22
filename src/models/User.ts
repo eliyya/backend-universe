@@ -46,7 +46,7 @@ export default class User {
   static async register(email: string, password: string) {
     const parsedEmail = z.string().email().safeParse(email)
     if (!parsedEmail.success) return { error: "Invalid email" };
-    const req = await supabase.from('users').select().eq('', email)
+    const req = await supabase.from('users').select().eq('email', email)
     console.log(req)
     if (req.status !== 200) return { error: "Invalid user or password" };
     if (req.data?.length) return { error: "User already exists" };
@@ -55,7 +55,7 @@ export default class User {
       email: parsedEmail.data,
       password: await hash(`${password}`),
       username: email.split("@")[0],
-    })
+    }).select();
     console.log('r', r);
     // const { data, error } = await supabase.from("users").eq("email", email).select();
     // console.log('?', {error, data});
