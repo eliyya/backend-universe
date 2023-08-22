@@ -51,24 +51,24 @@ export default class User {
     if (req.status !== 200) return { error: "Invalid user or password" };
     if (req.data?.length) return { error: "User already exists" };
     console.log('ok');
-        const r = await fetch(`${Deno.env.get("SUPABASE_URL")}/rest/v1/users`, {
-      method: "POST",
-      headers: {
-        apikey: Deno.env.get("SUPABASE_PUBLIC_KEY") as string,
-       "Authorization": `Bearer ${Deno.env.get("SUPABASE_PUBLIC_KEY")}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: parsedEmail.data,
-        password: await hash(`${password}`),
-        username: email.split("@")[0],
-      }),
-    }).then((res) => res.json())
-    // const r = await supabase.from('users').insert({
-    //   email: parsedEmail.data,
-    //   password: await hash(`${password}`),
-    //   username: email.split("@")[0],
-    // })
+    //     const r = await fetch(`${Deno.env.get("SUPABASE_URL")}/rest/v1/users`, {
+    //   method: "POST",
+    //   headers: {
+    //     apikey: Deno.env.get("SUPABASE_PUBLIC_KEY") as string,
+    //    "Authorization": `Bearer ${Deno.env.get("SUPABASE_PUBLIC_KEY")}`,
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify({
+    //     email: parsedEmail.data,
+    //     password: await hash(`${password}`),
+    //     username: email.split("@")[0],
+    //   }),
+    // }).then((res) => res.json())
+    const r = await supabase.from('users').insert({
+      email: parsedEmail.data,
+      password: await hash(`${password}`),
+      username: email.split("@")[0],
+    })
     console.log('r', r);
     // const { data, error } = await supabase.from("users").eq("email", email).select();
     // console.log('?', {error, data});
