@@ -47,7 +47,8 @@ export default class User {
     const parsedEmail = z.string().email().safeParse(email)
     if (!parsedEmail.success) return { error: "Invalid email", data: undefined };
     console.log('ok');
-    const r = await
+    try {
+      const r = await
     fetch('https://hfumkvdxfzkgmbkrfkoe.supabase.co/rest/v1/usuarios', {
       method: 'POST',
       headers: {
@@ -61,8 +62,16 @@ export default class User {
         password: await hash(password),
         username: await getDisponibility(email.split('@')[0]),
       })
-    }).then(async res => ({data:(await res.json())[0], error: undefined})).catch(e => ({error: e.message, data: undefined}));
+    }).then(async res => ({data:(await res.json())[0], error: undefined})).catch(e => {
+      console.log('ee', e);
+      
+      return ({error: e.message, data: undefined})
+    });
     return r
+    } catch (error) {
+      console.log('catch', error);
+      throw new Error(error.message);
+    }
   }
 }
 
