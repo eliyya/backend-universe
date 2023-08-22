@@ -8,6 +8,7 @@ export default createClient<Database>(
     auth: {
        persistSession: false,
        debug: true,
+       autoRefreshToken: false,
     },
   }
 )
@@ -24,6 +25,7 @@ export default createClient<Database>(
 
 //   async insert(): Promise<Partial<T['public']['Tables'][K]>> {
 //     const req = await fetch(`${this.client.url}/rest/v1/${String(this.name)}`, {
+
 //       method: "POST",
 //       headers: {
 //         apikey: this.client.key,
