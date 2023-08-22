@@ -1,5 +1,5 @@
 import { z } from "https://deno.land/x/zod@v3.21.4/mod.ts";
-import { compare, hash } from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
+import { compare, hash } from "../utils/hash.ts";
 import { SignJWT, jwtVerify } from 'https://deno.land/x/jose@v4.14.4/index.ts'
 
 const secret = new TextEncoder().encode(Deno.env.get("JWT_SECRET") as string)
