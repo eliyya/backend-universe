@@ -34,6 +34,7 @@ export default new Router()
             if (d.error) throw new Error(d.error);
             ctx.response.body = d.user
         } catch (error) {
+            console.log(error);
             ctx.response.status = 400;
             ctx.response.body = { message: error.message };
             return;
