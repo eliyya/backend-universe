@@ -47,18 +47,28 @@ export default class User {
     const parsedEmail = z.string().email().safeParse(email)
     if (!parsedEmail.success) return { error: "Invalid email" };
     console.log('ok');
-    const { data, error } = await supabase.from('usuarios').insert({
-      email: parsedEmail.data,
-      password: await hash(`${password}`),
-      username: await getDisponibility(email.split("@")[0]),
-    }).select();
-    if (error?.message.includes('duplicate key value violates unique constraint "users_email_key"'))
-      return { error: "Email already registered" };     
-    if (error) return { error };    
-    const [u] = data;
-    const user = User.schema.safeParse(u)
-    if (!user.success) throw new Error(JSON.stringify(user.error));
-    return { user: user.data };
+    try {
+      const { data, error } = await supabase.from('usuarios').insert({
+        email: parsedEmail.data,
+        password: await hash(`${password}`),
+        username: await getDisponibility(email.split("@")[0]),
+      }).select();
+      try {
+        if (error?.message.includes('duplicate key value violates unique constraint "users_email_key"'))
+        return { error: "Email already registered" };     
+      if (error) return { error };    
+      const [u] = data;
+      const user = User.schema.safeParse(u)
+      if (!user.success) throw new Error(JSON.stringify(user.error));
+      return { user: user.data };
+      } catch (error) {
+        console.log('r', error);
+        throw new Error(error);
+      }
+    } catch (error) {
+      console.log('e', error);
+      throw new Error(error);
+    }
   }
 }
 
