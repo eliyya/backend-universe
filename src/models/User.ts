@@ -45,30 +45,24 @@ export default class User {
 
   static async register(email: string, password: string) {
     const parsedEmail = z.string().email().safeParse(email)
-    if (!parsedEmail.success) return { error: "Invalid email" };
+    if (!parsedEmail.success) return { error: "Invalid email", data: undefined };
     console.log('ok');
-    try {
-      const { data, error } = await supabase.from('usuarios').insert({
-        email: parsedEmail.data,
-        password: await hash(`${password}`),
-        username: await getDisponibility(email.split("@")[0]),
-      }).select();
-      try {
-        if (error?.message.includes('duplicate key value violates unique constraint "users_email_key"'))
-        return { error: "Email already registered" };     
-      if (error) return { error };    
-      const [u] = data;
-      const user = User.schema.safeParse(u)
-      if (!user.success) throw new Error(JSON.stringify(user.error));
-      return { user: user.data };
-      } catch (error) {
-        console.log('r', error);
-        throw new Error(error);
-      }
-    } catch (error) {
-      console.log('e', error);
-      throw new Error(error);
-    }
+    const r = await
+    fetch('https://hfumkvdxfzkgmbkrfkoe.supabase.co/rest/v1/usuarios', {
+      method: 'POST',
+      headers: {
+        apikey: Deno.env.get("SERVICE_KEY") as string,
+        "Authorization": `Bearer ${Deno.env.get("SERVICE_KEY") as string}`,
+        'Content-Type': 'application/json',
+        "Prefer": "return=representation"
+      },
+      body: JSON.stringify({
+        email,
+        password: await hash(password),
+        username: await getDisponibility(email.split('@')[0]),
+      })
+    }).then(async res => ({data:(await res.json())[0], error: undefined})).catch(e => ({error: e.message, data: undefined}));
+    return r
   }
 }
 
