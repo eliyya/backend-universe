@@ -4,6 +4,12 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.32.0";
 export default createClient<Database>(
   Deno.env.get("SUPABASE_URL") as string,
   Deno.env.get("SERVICE_KEY") as string,
+  {
+    auth: {
+       persistSession: false,
+       debug: true,
+    },
+  }
 )
 
 // class InsertTable<T extends Database, K extends keyof T['public']['Tables']> {
