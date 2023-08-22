@@ -46,9 +46,9 @@ export default class User {
   static async register(email: string, password: string) {
     const parsedEmail = z.string().email().safeParse(email)
     if (!parsedEmail.success) return { error: "Invalid email" };
-    const req = await supabase.from('users').select().eq('email', email)
+    const req = await supabase.from('usuarios').select().eq('email', email)
     console.log(req)
-    if (req.status !== 200) return { error: "Invalid user or password" };
+    if (req.status !== 200) return { error: req.error?.message || "Unknown error" };
     if (req.data?.length) return { error: "User already exists" };
     console.log('ok');
     //     const r = await fetch(`${Deno.env.get("SUPABASE_URL")}/rest/v1/users`, {
@@ -64,7 +64,7 @@ export default class User {
     //     username: email.split("@")[0],
     //   }),
     // }).then((res) => res.json())
-    const r = await supabase.from('users').insert({
+    const r = await supabase.from('usuarios').insert({
       email: parsedEmail.data,
       password: await hash(`${password}`),
       username: email.split("@")[0],
