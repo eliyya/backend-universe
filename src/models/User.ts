@@ -49,25 +49,15 @@ export default class User {
     console.log('ok');
     try {
       const r = await
-    fetch('https://hfumkvdxfzkgmbkrfkoe.supabase.co/rest/v1/usuarios', {
-      method: 'POST',
-      headers: {
-        apikey: Deno.env.get("SERVICE_KEY") as string,
-        "Authorization": `Bearer ${Deno.env.get("SERVICE_KEY") as string}`,
-        'Content-Type': 'application/json',
-        "Prefer": "return=representation"
-      },
-      body: JSON.stringify({
+      supabase.from('users').insert({
         email,
         password: await hash(password),
         username: await getDisponibility(email.split('@')[0]),
-      })
-    }).then(async res => ({data:(await res.json())[0], error: undefined})).catch(e => {
-      console.log('ee', e);
-      
-      return ({error: e.message, data: undefined})
-    });
-    return r
+      }).select()
+      if (r.error) throw new Error(JSON.stringify(r));
+      const puser = User.schema.safeParse(r.data[0])
+      if (!puser.success) throw new Error(JSON.stringify(puser.error));
+      return puser.data
     } catch (error) {
       console.log('catch', error);
       throw new Error(error.message);
@@ -76,7 +66,7 @@ export default class User {
 }
 
 async function getDisponibility(username: string) {
-  const users = await supabase.from('usuarios').select('username').like('username', `${username}`)
+  const users = await supabase.from('users').select('username').like('username', `${username}`)
   if (users.error) throw new Error(users.error.message);
   if (users.data.length == 0) return username;
   const userlist = users.data.map((u: {username:string}) => u.username);
