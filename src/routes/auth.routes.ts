@@ -1,5 +1,5 @@
-import { Router } from "https://deno.land/x/oak@v12.6.0/mod.ts";
-import User from "../models/User.ts";
+import { Router } from 'https://deno.land/x/oak@v12.6.0/mod.ts'
+import { userController } from '../controllers/default.ts'
 // Create a single supabase client for interacting with your database
 
 
@@ -15,7 +15,7 @@ router
       return;
     }
     const { user, password } = await ctx.request.body({ type: "json" }).value;
-    const token = await User.generateToken(user, password);
+    const token = await userController.login(user, password);
     if (token.error) {
       ctx.response.status = 401;
       ctx.response.body = { message: token.error };
