@@ -12,6 +12,6 @@ router.use('/auth', auth.routes(), auth.allowedMethods())
 router.use('/api', api.routes(), api.allowedMethods())
 app.use(router.routes())
 
-console.log('Server running on port http://localhost:8000')
+console.log('Server running on port http://localhost:25565')
 const PORT = parseInt(Deno.env.get('PORT') as string) || 25565
 await app.listen({ port: PORT })

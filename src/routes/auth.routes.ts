@@ -16,11 +16,13 @@ router
     }
     const { user, password } = await ctx.request.body({ type: "json" }).value;
     const token = await userController.login(user, password);
-    if (token.error) {
-      ctx.response.status = 401;
-      ctx.response.body = { message: token.error };
-      return;
-    }
+    console.log(token);
+    
+    // if (token.error) {
+    //   ctx.response.status = 401;
+    //   ctx.response.body = { message: token.error };
+    //   return;
+    // }
     ctx.response.body = token;
   })
 

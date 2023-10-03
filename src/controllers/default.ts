@@ -1,1 +1,1 @@
-export * from './supabase.ts'
+export * from './sqlite.ts'
