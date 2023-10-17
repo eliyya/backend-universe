@@ -15,9 +15,7 @@ router
       return;
     }
     const { user, password } = await ctx.request.body({ type: "json" }).value;
-    const token = await userController.login(user, password);
-    console.log(token);
-    
+    const token = await userController.login(user, password);    
     // if (token.error) {
     //   ctx.response.status = 401;
     //   ctx.response.body = { message: token.error };

@@ -13,7 +13,8 @@ export default new Router()
         }
         try {
             const data = await decodeToken<tuser>(token)
-            ctx.response.body = data
+            const user = await userController.get(data.id)
+            ctx.response.body = user
         } catch (error) {
             ctx.response.status = 401
             ctx.response.body = { message: (error as Error).message }
@@ -36,7 +37,7 @@ export default new Router()
             const x = await userController.register(user, password)
             ctx.response.body = x
         } catch (error) {
-            console.log(error)
+            console.error(error)
             ctx.response.status = 400
             ctx.response.body = { message: error.message }
             return

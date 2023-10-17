@@ -53,7 +53,6 @@ function getDisponibility(username: string) {
         .prepare('select username from users where username like ?')
         .values(`%${username}%`)
         .flat()
-    console.log(users);    
     if (users.length == 0) return username
     const next = (num: number): string => {
         if (users.includes(`${username}${num}`)) return next(num+1)
