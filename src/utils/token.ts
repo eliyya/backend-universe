@@ -5,9 +5,8 @@ const secret = new TextEncoder().encode(Deno.env.get('JWT_SECRET') as string)
 export async function decodeToken<expected>(token: string) {
     try {
         const { payload } = await jwtVerify(token, secret)
-        // @ts-ignore 
-        if (payload.expires < Date.now()) throw new Error('Token expired')
-        return payload as expected
+        if (payload.expires as number < Date.now()) throw new Error('Token expired')
+        return payload as expected & { expires: number }
     } catch (error) {
         throw new Error(error.message)
     }

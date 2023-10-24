@@ -4,6 +4,8 @@ import { oakCors } from 'https://deno.land/x/cors@v1.2.2/mod.ts'
 import auth from './routes/auth.routes.ts'
 import api from './routes/api.routes.ts'
 
+if (!Deno.env.get('JWT_SECRET')) Deno.exit(1)
+
 const app = new Application()
 app.use(oakCors())
 // router handler
