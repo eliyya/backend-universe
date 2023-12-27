@@ -1,7 +1,7 @@
 import { z } from 'https://deno.land/x/zod@v3.21.4/mod.ts'
 import { compare, hash } from '../../utils/hash.ts'
 import db from "../../sqlite.ts";
-import { iUser, tuser } from '../User.ts'
+import { iUser, tuser } from './interface.ts'
 import { generateToken } from '../../utils/token.ts'
 
 export class User implements iUser {

@@ -1,4 +1,4 @@
-import { Database } from "../database.types.ts";
+import { Database } from "../../database.types.ts";
 
 export type tuser = Omit<Database['public']['Tables']['users']['Row'], 'password'>
 

@@ -1,7 +1,7 @@
 import { Router } from 'https://deno.land/x/oak@v12.6.0/mod.ts'
 import { userController } from '../../controllers/default.ts'
 import { decodeToken } from '../../utils/token.ts'
-import { type tuser } from '../../models/User.ts'
+import { type tuser } from '../../models/User/interface.ts'
 
 export default new Router()
     .get('/@me', async (ctx) => {
