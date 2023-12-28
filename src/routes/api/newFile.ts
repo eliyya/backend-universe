@@ -2,7 +2,6 @@ import { Hono } from "https://deno.land/x/hono@v3.11.11/mod.ts";
 import { userController } from "../../controllers/default.ts";
 import { decodeToken } from "../../utils/token.ts";
 import { type tuser } from "../../models/User/interface.ts";
-import { Sentry } from "../../sentry.ts";
 
 export default new Hono()
   .get("/@me", async (ctx) => {
@@ -15,9 +14,7 @@ export default new Hono()
       const user = await userController.get(data.id);
       ctx.body = user;
     } catch (error) {
-      console.error(error);
-      Sentry.captureException(error);
-      return ctx.json({ message: "Internal Server Error" }, 500);
+      return ctx.json({ message: "an error" }, 401);
     }
   })
   .post("/", async (ctx) => {
@@ -32,7 +29,6 @@ export default new Hono()
       ctx.body = x;
     } catch (error) {
       console.error(error);
-      Sentry.captureException(error);
-      return ctx.json({ message: "Internal Server Error" }, 500);
+      return ctx.json({ message: "An error" }, 400);
     }
   });
