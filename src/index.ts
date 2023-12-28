@@ -1,19 +1,17 @@
-import 'https://deno.land/std@0.199.0/dotenv/load.ts'
-import { Application, Router } from 'https://deno.land/x/oak@v12.6.0/mod.ts'
-import { oakCors } from 'https://deno.land/x/cors@v1.2.2/mod.ts'
-import auth from './routes/auth.routes.ts'
-import api from './routes/api.routes.ts'
+import "https://deno.land/std@0.199.0/dotenv/load.ts";
+import { Hono } from "https://deno.land/x/hono@v3.11.11/mod.ts";
+import { cors, logger } from "https://deno.land/x/hono@v3.11.11/middleware.ts";
 
-if (!Deno.env.get('JWT_SECRET')) Deno.exit(1)
+import auth from "./routes/auth.routes.ts";
 
-const app = new Application()
-app.use(oakCors())
-// router handler
-const router = new Router()
-router.use('/auth', auth.routes(), auth.allowedMethods())
-router.use('/api', api.routes(), api.allowedMethods())
-app.use(router.routes())
+if (!Deno.env.get("JWT_SECRET")) Deno.exit(1);
 
-console.log('Server running on port http://localhost:25565')
-const PORT = parseInt(Deno.env.get('PORT') as string) || 25565
-await app.listen({ port: PORT })
+const app = new Hono();
+
+app.use(cors());
+app.use(logger((c) => console.log(c)));
+app.get("/id", (c) => c.text(`Hello`));
+
+app.route("/auth", auth);
+
+Deno.serve(app.fetch);

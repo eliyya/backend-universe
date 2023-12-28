@@ -1,27 +1,16 @@
-import { Router } from 'https://deno.land/x/oak@v12.6.0/mod.ts'
-import { userController } from '../controllers/default.ts'
-// Create a single supabase client for interacting with your database
+import { Hono } from "https://deno.land/x/hono@v3.11.11/mod.ts";
+import { userController } from "../controllers/default.ts";
 
-
-// const codes = new Map<string, string>();
-const router = new Router();
-
-router
+export default new Hono()
   .post("/authorize", async (ctx) => {
-    // revisamos si existe un body
-    if (!ctx.request.hasBody) {
-      ctx.response.status = 400;
-      ctx.response.body = { message: "Invalid request" };
-      return;
+    const body = await ctx.req.parseBody<{ email: string; password: string }>();
+    if (!Object.keys(body).length) {
+      return ctx.json({ message: "Invalid request" }, 400);
     }
-    const { user, password } = await ctx.request.body({ type: "json" }).value;
-    const token = await userController.login(user, password);    
-    // if (token.error) {
-    //   ctx.response.status = 401;
-    //   ctx.response.body = { message: token.error };
-    //   return;
-    // }
-    ctx.response.body = token;
+    const { email, password } = body;
+    const token = await userController.login(email, password);
+    return ctx.json(token);
   })
-
-export default router;
+  .get("/authorize", (ctx) => {
+    return ctx.json({ message: "Hello World" });
+  });

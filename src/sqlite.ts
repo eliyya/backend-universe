@@ -1,6 +1,6 @@
-import { Database } from 'https://deno.land/x/sqlite3@0.9.1/mod.ts'
+import { Database } from "https://deno.land/x/sqlite3@0.9.1/mod.ts";
 
-const db = new Database('database.db')
+const db = new Database("database.db");
 
 // await db.exec(`
 // -- Tabla 'users'
@@ -62,6 +62,6 @@ where id = 1;
 
 -- Delete
 delete from usuarios where id = 1
-`)
+`);
 
-export default db
+export default db;
