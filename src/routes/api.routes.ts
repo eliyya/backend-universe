@@ -1,5 +1,5 @@
-import { Router } from "https://deno.land/x/oak@v12.6.0/mod.ts";
+import { Hono } from "https://deno.land/x/hono@v3.11.11/mod.ts";
 import users from "./api/users.routes.ts";
 
-export default new Router()
-  .use("/users", users.routes());
+export default new Hono()
+  .route("/users", users);

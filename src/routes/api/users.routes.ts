@@ -1,45 +1,34 @@
-import { Router } from "https://deno.land/x/oak@v12.6.0/mod.ts";
+import { Hono } from "https://deno.land/x/hono@v3.11.11/mod.ts";
 import { userController } from "../../controllers/default.ts";
 import { decodeToken } from "../../utils/token.ts";
 import { type tuser } from "../../models/User/interface.ts";
 
-export default new Router()
+export default new Hono()
   .get("/@me", async (ctx) => {
-    const token = ctx.request.headers.get("Authorization")?.split(" ")[1];
+    const token = ctx.req.header("Authorization")?.split(" ")[1];
     if (!token) {
-      ctx.response.status = 401;
-      ctx.response.body = { message: "Unauthorized" };
-      return;
+      return ctx.json({ message: "Unauthorized" }, 401);
     }
     try {
       const data = await decodeToken<tuser>(token);
       const user = await userController.get(data.id);
-      ctx.response.body = user;
+      ctx.body = user;
     } catch (error) {
-      ctx.response.status = 401;
-      ctx.response.body = { message: (error as Error).message };
+      return ctx.json({ message: (error as Error).message }, 401);
     }
   })
   .post("/", async (ctx) => {
-    if (!ctx.request.hasBody) {
-      ctx.response.status = 400;
-      ctx.response.body = { message: "Invalid user data" };
-      return;
-    }
-    const { user, password } = await ctx.request.body({ type: "json" }).value ??
-      {};
-    if (!user || !password) {
-      ctx.response.status = 400;
-      ctx.response.body = { message: "Invalid user data" };
-      return;
+    const { email, password } = await ctx.req.parseBody<
+      { email: string; password: string }
+    >();
+    if (!email || !password) {
+      return ctx.json({ message: "Invalid user data" }, 400);
     }
     try {
-      const x = await userController.register(user, password);
-      ctx.response.body = x;
+      const x = await userController.register(email, password);
+      ctx.body = x;
     } catch (error) {
       console.error(error);
-      ctx.response.status = 400;
-      ctx.response.body = { message: error.message };
-      return;
+      return ctx.json({ message: (error as Error).message }, 400);
     }
   });
