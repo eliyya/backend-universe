@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry'
 
-if (Deno.env.get('SENTRY_DNS') && Deno.env.get('DENO_ENV') === 'production') {
+if (Deno.env.get('SENTRY_DNS') && Deno.env.get('NODE_ENV') === 'production') {
     Sentry.init({
         dsn: Deno.env.get('SENTRY_DNS'),
         integrations: [new Sentry.Integrations.Console()],
