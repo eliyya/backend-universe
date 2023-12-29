@@ -7,5 +7,18 @@
     "singleQuote": true,
     "semiColons": false,
     "indentWidth": 4
+  },
+  "imports": {
+    "@hono/": "https://deno.land/x/hono@v3.11.11/",
+    "@zod/": "https://deno.land/x/zod@v3.21.4/",
+    "@dotenv/": "https://deno.land/std@0.199.0/dotenv/",
+    "@encoding/": "https://deno.land/std@0.133.0/encoding/",
+    "@jose/": "https://deno.land/x/jose@v4.14.4/",
+    "@sentry": "npm:@sentry/node",
+    "@controller": "./src/controllers/default.ts",
+    "@error": "./src/sentry.ts",
+    "@utils/": "./src/utils/",
+    "@models/": "./src/models/",
+    "@middlewares/": "./src/middlewares/"
   }
 }

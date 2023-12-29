@@ -1,9 +1,9 @@
-import { z } from 'https://deno.land/x/zod@v3.21.4/mod.ts'
-import { compare, hash } from '../../utils/hash.ts'
+import { z } from '@zod/mod.ts'
+import { compare, hash } from '@utils/hash.ts'
 import sql from '../../sqlite.ts'
 import { iUser, tuser } from './interface.ts'
-import { generateToken } from '../../utils/token.ts'
-import { Sentry } from '../../sentry.ts'
+import { generateToken } from '@utils/token.ts'
+import { Sentry } from '@error'
 
 export class User implements iUser {
     // deno-lint-ignore require-await

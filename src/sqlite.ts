@@ -19,6 +19,7 @@ const sql = {
     run(strings: TemplateStringsArray, ...values: RestBindParameters) {
         return db.prepare(strings.join('?')).run(...values)
     },
+    // deno-lint-ignore no-explicit-any
     values<T extends unknown[] = any[]>(
         strings: TemplateStringsArray,
         ...values: RestBindParameters

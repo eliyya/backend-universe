@@ -1,8 +1,8 @@
-import { z } from 'https://deno.land/x/zod@v3.21.4/mod.ts'
-import { compare, hash } from '../../utils/hash.ts'
+import { z } from '@zod/mod.ts'
+import { compare, hash } from '@utils/hash.ts'
 import supabase from '../../supabase.ts'
 import { iUser, tuser } from './interface.ts'
-import { generateToken } from '../../utils/token.ts'
+import { generateToken } from '@utils/token.ts'
 
 export class User implements iUser {
     get(id: number): Promise<tuser> {
