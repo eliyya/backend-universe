@@ -1,6 +1,7 @@
 {
     "recommendations": [
         "dineug.vuerd-vscode", 
-        "denoland.vscode-deno"
+        "denoland.vscode-deno",
+        "thebearingedge.vscode-sql-lit"
     ]
 }

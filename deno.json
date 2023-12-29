@@ -2,5 +2,10 @@
   "tasks": {
     "start": "deno run --allow-net --allow-env --allow-sys --allow-read src/index.ts",
     "dev": "deno run --allow-net --allow-env --allow-sys --allow-read --watch src/index.ts"
+  },
+  "fmt": {
+    "singleQuote": true,
+    "semiColons": false,
+    "indentWidth": 4
   }
 }

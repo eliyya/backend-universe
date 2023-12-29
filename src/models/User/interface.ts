@@ -6,11 +6,10 @@ export type tuser = Omit<
 >;
 
 export interface iUser {
-  get(id: string): Promise<tuser>;
+  get(id: number): Promise<tuser>;
   register(email: string, password: string): Promise<tuser>;
   login(
     email: string,
     password: string,
   ): Promise<{ token: string; expires: number }>;
-  // generateToken(id: string): Promise<{token: string; expires: number}>
 }

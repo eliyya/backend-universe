@@ -4,9 +4,7 @@ import { Sentry } from "../../sentry.ts";
 import { auth } from "../../middlewares/auth.ts";
 
 export default new Hono()
-  .get("/@me", auth, async (ctx) => {
-    return ctx.json(ctx.var.user);
-  })
+  .get("/@me", auth, (ctx) => ctx.json(ctx.var.user))
   .post("/", async (ctx) => {
     const { email, password } = await ctx.req.parseBody<
       { email: string; password: string }
