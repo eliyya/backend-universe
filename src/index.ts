@@ -4,6 +4,7 @@ import { Hono } from '@hono/mod.ts'
 import { cors, logger } from '@hono/middleware.ts'
 
 if (!Deno.env.get('JWT_SECRET')) Deno.exit(1)
+console.log(Deno.env.toObject())
 
 const app = new Hono()
 
