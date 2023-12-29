@@ -1,11 +1,11 @@
 import { z } from "https://deno.land/x/zod@v3.21.4/mod.ts";
 import { compare, hash } from "../../utils/hash.ts";
 import supabase from "../../supabase.ts";
-import { iUser } from "./interface.ts";
+import { iUser, tuser } from "./interface.ts";
 import { generateToken } from "../../utils/token.ts";
 
 export class User implements iUser {
-  async get(id: string) {
+  async get(id: string): Promise<tuser> {
     const u = await supabase.from("users").select().eq("id", id);
     if (u.error) throw new Error(JSON.stringify(u));
     delete u.password;

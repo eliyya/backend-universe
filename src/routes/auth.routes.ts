@@ -10,7 +10,4 @@ export default new Hono()
     const { email, password } = body;
     const token = await userController.login(email, password);
     return ctx.json(token);
-  })
-  .get("/authorize", (ctx) => {
-    return ctx.json({ message: "Hello World" });
   });

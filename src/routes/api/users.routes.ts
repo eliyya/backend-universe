@@ -1,24 +1,11 @@
 import { Hono } from "https://deno.land/x/hono@v3.11.11/mod.ts";
 import { userController } from "../../controllers/default.ts";
-import { decodeToken } from "../../utils/token.ts";
-import { type tuser } from "../../models/User/interface.ts";
 import { Sentry } from "../../sentry.ts";
+import { auth } from "../../middlewares/auth.ts";
 
 export default new Hono()
-  .get("/@me", async (ctx) => {
-    const token = ctx.req.header("Authorization")?.split(" ")[1];
-    if (!token) {
-      return ctx.json({ message: "Unauthorized" }, 401);
-    }
-    try {
-      const data = await decodeToken<tuser>(token);
-      const user = await userController.get(data.id);
-      ctx.body = user;
-    } catch (error) {
-      console.error(error);
-      Sentry.captureException(error);
-      return ctx.json({ message: "Internal Server Error" }, 500);
-    }
+  .get("/@me", auth, async (ctx) => {
+    return ctx.json(ctx.var.user);
   })
   .post("/", async (ctx) => {
     const { email, password } = await ctx.req.parseBody<
