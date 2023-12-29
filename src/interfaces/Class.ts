@@ -6,7 +6,7 @@ export interface iClass {
     get(id: number): Promise<tClass>
     create(
         options:
-            & Partial<tClass>
+            & Omit<Partial<tClass>, 'id' | 'created_at'>
             & Pick<tClass, 'name' | 'teacher_id' | 'subject'>,
     ): Promise<tClass>
     update(

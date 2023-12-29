@@ -3,7 +3,8 @@
   "packages": {
     "specifiers": {
       "npm:@sentry/node": "npm:@sentry/node@7.91.0",
-      "npm:@sentry/profiling-node": "npm:@sentry/profiling-node@1.3.2_@sentry+node@7.91.0"
+      "npm:@sentry/profiling-node": "npm:@sentry/profiling-node@1.3.2_@sentry+node@7.91.0",
+      "npm:@types/node": "npm:@types/node@18.16.19"
     },
     "npm": {
       "@sentry-internal/tracing@7.91.0": {
@@ -48,6 +49,10 @@
         "dependencies": {
           "@sentry/types": "@sentry/types@7.91.0"
         }
+      },
+      "@types/node@18.16.19": {
+        "integrity": "sha512-IXl7o+R9iti9eBW4Wg2hx1xQDig183jj7YLn8F7udNceyfkbn1ZxmzZXuak20gR40D7pIkIY1kYGx5VIGbaHKA==",
+        "dependencies": {}
       },
       "agent-base@6.0.2": {
         "integrity": "sha512-RZNwNclF7+MS/8bDg70amg32dyeZGZxiDuQmZxKLAlQjr3jGyLx+4Kkk58UO7D2QdgFIQCovuSuZESne6RG6XQ==",
@@ -101,7 +106,8 @@
     }
   },
   "redirects": {
-    "https://deno.land/x/sentry/index.mjs": "https://deno.land/x/sentry@7.91.0/index.mjs"
+    "https://deno.land/x/sentry/index.mjs": "https://deno.land/x/sentry@7.91.0/index.mjs",
+    "https://esm.sh/@supabase/supabase-js@2": "https://esm.sh/@supabase/supabase-js@2.39.1"
   },
   "remote": {
     "https://deno.land/std@0.133.0/encoding/hex.ts": "7f023e1e51cfd6b189682e602e8640939e7be71a300a2fcf3daf8f84dc609bbc",

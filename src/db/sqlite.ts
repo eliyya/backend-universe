@@ -25,9 +25,23 @@ CREATE TABLE IF NOT EXISTS classes (
     teacher_id INTEGER NOT NULL,
     icon TEXT NULL,
     description TEXT NULL,
-    member_ids TEXT NOT NULL,  -- En SQLite, se usa TEXT para almacenar un array (puede contener JSON o texto separado por comas)
-    group_ids TEXT NOT NULL,   -- En SQLite, se usa TEXT para almacenar un array (puede contener JSON o texto separado por comas)
     FOREIGN KEY (teacher_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+-- Tabla 'class_members'
+CREATE TABLE IF NOT EXISTS class_members (
+    class_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    FOREIGN KEY (class_id) REFERENCES classes(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+-- Tabla 'class_groups'
+CREATE TABLE IF NOT EXISTS class_groups (
+    class_id INTEGER NOT NULL,
+    group_id INTEGER NOT NULL,
+    FOREIGN KEY (class_id) REFERENCES classes(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (group_id) REFERENCES groups(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 `
 

@@ -5,7 +5,7 @@ export class Class implements iClass {
     // deno-lint-ignore require-await
     async create(
         options:
-            & Partial<tClass>
+            & Omit<Partial<tClass>, 'id' | 'created_at'>
             & Pick<tClass, 'name' | 'teacher_id' | 'subject'>,
     ): Promise<tClass> {
         db.sql`
@@ -32,9 +32,9 @@ export class Class implements iClass {
                 user_id,
             )
             values ${
-                member_ids.map((id) => `(${classId}, ${id})`).join(
-                    ',',
-                )
+                member_ids
+                    .map((id) => `(${classId}, ${id})`)
+                    .join(',')
             }
             `
         }
@@ -45,9 +45,9 @@ export class Class implements iClass {
                 group_id,
             )
             values ${
-                group_ids.map((id) => `(${classId}, ${id})`).join(
-                    ',',
-                )
+                group_ids
+                    .map((id) => `(${classId}, ${id})`)
+                    .join(',')
             }
             `
         }
@@ -66,23 +66,105 @@ export class Class implements iClass {
 
     // deno-lint-ignore require-await
     async get(id: number): Promise<tClass> {
-        const [c] = db.sql<tClass>`
+        const [c] = db.sql<Omit<tClass, 'group_ids' | 'member_ids'>>`
         select * from classes where id = ${id}
         `
-        return c
+        const group_ids = db.sql<{ group_id: number }>`
+        select group_id from class_groups where class_id = ${id}
+        `
+        const member_ids = db.sql<{ user_id: number }>`
+        select user_id from class_members where class_id = ${id}
+        `
+        return {
+            ...c,
+            group_ids: group_ids.map(({ group_id }) => group_id),
+            member_ids: member_ids.map(({ user_id }) => user_id),
+        }
     }
 
-    // deno-lint-ignore require-await
     async update(
         id: number,
         options: Omit<Partial<tClass>, 'id'>,
     ): Promise<tClass> {
-        const [c] = db.sql<tClass>`
-        update classes set ${
-            Object.entries(options).map(([key, value]) => `${key} = ${value}`)
-                .join(',')
-        } where id = ${id}
-        `
-        return c
+        const c = await this.get(id)
+        if (!c) throw new Error('Class not found')
+        if (
+            options.name !== c.name ||
+            options.subject !== c.subject ||
+            options.icon !== c.icon ||
+            options.description !== c.description ||
+            options.teacher_id !== c.teacher_id
+        ) {
+            db.sql`
+            UPDATE classes
+            SET
+                name = ${options.name ?? c.name},
+                subject = ${options.subject ?? c.subject},
+                icon = ${options.icon ?? c.icon ?? null},
+                description = ${options.description ?? c.description ?? null}
+                teacher_id = ${options.teacher_id ?? c.teacher_id}
+            WHERE id = ${id}`
+        }
+        const { member_ids = [], group_ids = [] } = options
+        const { member_ids: oldMemberIds, group_ids: oldGroupIds } = c
+        const membersToDelete = oldMemberIds.filter((id) =>
+            !member_ids.includes(id)
+        )
+        const membersToAdd = member_ids.filter((id) =>
+            !oldMemberIds.includes(id)
+        )
+        const groupsToDelete = oldGroupIds.filter((id) =>
+            !group_ids.includes(id)
+        )
+        const groupsToAdd = group_ids.filter((id) => !oldGroupIds.includes(id))
+        if (membersToDelete.length) {
+            for (const id of membersToDelete) {
+                db.sql`
+                delete from class_members 
+                where 
+                    class_id = ${c.id} 
+                    and user_id = ${id}
+                `
+            }
+        }
+        if (membersToAdd.length) {
+            for (const id of membersToAdd) {
+                db.sql`
+                insert into class_members (
+                    class_id,
+                    user_id,
+                )
+                values (
+                    ${c.id},
+                    ${id},
+                )
+                `
+            }
+        }
+        if (groupsToDelete.length) {
+            for (const id of groupsToDelete) {
+                db.sql`
+                delete from class_groups 
+                where 
+                    class_id = ${c.id} 
+                    and group_id = ${id}
+                `
+            }
+        }
+        if (groupsToAdd.length) {
+            for (const id of groupsToAdd) {
+                db.sql`
+                insert into class_groups (
+                    class_id,
+                    group_id,
+                )
+                values (
+                    ${c.id},
+                    ${id},
+                )
+                `
+            }
+        }
+        return await this.get(id)
     }
 }
