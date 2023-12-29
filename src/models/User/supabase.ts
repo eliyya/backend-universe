@@ -3,11 +3,18 @@ import { compare, hash } from '@utils/hash.ts'
 import supabase from '@db/supabase.ts'
 import { iUser, tUser } from '@interfaces/User.ts'
 import { generateToken } from '@utils/token.ts'
+import { Sentry } from '@error'
 
 export class User implements iUser {
-    get(id: number): Promise<tUser> {
-        const u = supabase.from('users').select().eq('id', id)
-        if (u.error) throw new Error(JSON.stringify(u))
+    async get(id: number): Promise<tUser> {
+        const req = await supabase.from('users').select().eq('id', id)
+        if (req.error) {
+            console.error(req.error)
+            Sentry.captureException(req.error)
+            throw new Error(req.error.message)
+        }
+        const [u] = req.data
+        // @ts-ignore
         delete u.password
         return u
     }
@@ -21,7 +28,11 @@ export class User implements iUser {
                 password: await hash(password),
                 username: await getDisponibility(email.split('@')[0]),
             }).select()
-            if (r.error) throw new Error(JSON.stringify(r))
+            if (r.error) {
+                console.error(r.error)
+                Sentry.captureException(r.error)
+                throw new Error(r.error.message)
+            }
             return r.data[0]
         } catch (error) {
             throw new Error(error.message)
@@ -38,6 +49,7 @@ export class User implements iUser {
         if (!(await compare(password, u.password))) {
             throw new Error('Invalid user or password')
         }
+        // @ts-ignore
         delete u.password
         return generateToken(u)
     }
