@@ -1,10 +1,10 @@
 import { type MiddlewareHandler } from '@hono/mod.ts'
 import { userController } from '@controller'
-import { type tuser } from '@models/User/interface.ts'
+import { type tUser } from '@interfaces/User.ts'
 import { decodeToken } from '@utils/token.ts'
 import { Sentry } from '@error'
 
-export const auth: MiddlewareHandler<{ Variables: { user: tuser } }> = async (
+export const auth: MiddlewareHandler<{ Variables: { user: tUser } }> = async (
     ctx,
     next,
 ) => {
@@ -14,7 +14,7 @@ export const auth: MiddlewareHandler<{ Variables: { user: tuser } }> = async (
             return ctx.json({ message: 'Unauthorized' }, 401)
         }
 
-        const data = await decodeToken<tuser>(token)
+        const data = await decodeToken<tUser>(token)
         const user = await userController.get(data.id)
         if (!user) {
             return ctx.json({ message: 'Unauthorized' }, 401)

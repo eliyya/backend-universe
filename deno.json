@@ -1,7 +1,7 @@
 {
   "tasks": {
-    "start": "deno run --allow-net --allow-env --allow-sys --allow-read src/index.ts",
-    "dev": "deno run --allow-net --allow-env --allow-sys --allow-read --watch src/index.ts"
+    "start": "deno run --allow-net --allow-env --allow-sys --allow-read --allow-ffi --allow-write --unstable src/index.ts",
+    "dev": "deno run --allow-net --allow-env --allow-sys --allow-read --allow-ffi --allow-write --unstable --watch src/index.ts"
   },
   "fmt": {
     "singleQuote": true,
@@ -14,11 +14,15 @@
     "@dotenv/": "https://deno.land/std@0.199.0/dotenv/",
     "@encoding/": "https://deno.land/std@0.133.0/encoding/",
     "@jose/": "https://deno.land/x/jose@v4.14.4/",
+    "@supabase": "https://esm.sh/@supabase/supabase-js@2.32.0",
+    "@sqlite/": "https://deno.land/x/sqlite3@0.10.0/",
     "@sentry": "npm:@sentry/node",
     "@controller": "./src/controllers/default.ts",
     "@error": "./src/sentry.ts",
     "@utils/": "./src/utils/",
     "@models/": "./src/models/",
-    "@middlewares/": "./src/middlewares/"
+    "@interfaces/": "./src/interfaces/",
+    "@middlewares/": "./src/middlewares/",
+    "@db/": "./src/db/"
   }
 }

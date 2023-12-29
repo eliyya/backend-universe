@@ -1,11 +1,11 @@
 import { z } from '@zod/mod.ts'
 import { compare, hash } from '@utils/hash.ts'
-import supabase from '../../supabase.ts'
-import { iUser, tuser } from './interface.ts'
+import supabase from '@db/supabase.ts'
+import { iUser, tUser } from '@interfaces/User.ts'
 import { generateToken } from '@utils/token.ts'
 
 export class User implements iUser {
-    get(id: number): Promise<tuser> {
+    get(id: number): Promise<tUser> {
         const u = supabase.from('users').select().eq('id', id)
         if (u.error) throw new Error(JSON.stringify(u))
         delete u.password

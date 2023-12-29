@@ -1,7 +1,7 @@
 import { Hono } from '@hono/mod.ts'
 import { userController } from '@controller'
 import { decodeToken } from '@utils/token.ts'
-import { type tuser } from '@models/User/interface.ts'
+import { type tUser } from '@interfaces/User.ts'
 
 export default new Hono()
     .get('/:ID', async (ctx) => {
@@ -9,9 +9,9 @@ export default new Hono()
         if (!token) {
             return ctx.json({ message: 'Unauthorized' }, 401)
         }
-        let user: tuser | undefined
+        let user: tUser | undefined
         try {
-            const data = await decodeToken<tuser>(token)
+            const data = await decodeToken<tUser>(token)
             user = await userController.get(data.id)
         } catch (error) {
             console.log(error)

@@ -1,14 +1,14 @@
 import { z } from '@zod/mod.ts'
 import { compare, hash } from '@utils/hash.ts'
-import sql from '../../sqlite.ts'
-import { iUser, tuser } from './interface.ts'
+import { sql } from '@db/sqlite.ts'
+import { iUser, tUser } from '@interfaces/User.ts'
 import { generateToken } from '@utils/token.ts'
 import { Sentry } from '@error'
 
 export class User implements iUser {
     // deno-lint-ignore require-await
-    async get(id: number): Promise<tuser> {
-        const u = sql.get<tuser>`
+    async get(id: number): Promise<tUser> {
+        const u = sql.get<tUser>`
         select id, created_at, username, displayname, avatar, email 
         from users 
         where id = ${id}`
@@ -20,7 +20,7 @@ export class User implements iUser {
         email: string,
         password: string,
     ): Promise<{ token: string; expires: number }> {
-        const u = sql.get<tuser & { password: string }>`
+        const u = sql.get<tUser & { password: string }>`
         select * 
         from users 
         where email = ${email}`
@@ -38,7 +38,7 @@ export class User implements iUser {
         })
     }
 
-    async register(email: string, password: string): Promise<tuser> {
+    async register(email: string, password: string): Promise<tUser> {
         const parsedEmail = z.string().email().safeParse(email)
         if (!parsedEmail.success) throw new Error('Invalid email')
         try {
@@ -53,7 +53,7 @@ export class User implements iUser {
                 ${await hash(password)}, 
                 ${getDisponibility(email.split('@')[0])}
             )`
-            const x = sql.get<tuser>`
+            const x = sql.get<tUser>`
             select id, created_at, username, displayname, email, avatar
             from users
             where email = ${email}`
