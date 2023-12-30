@@ -33,14 +33,14 @@ export class User implements iUser {
                 const user = await this.get(req.user_id)
                 return generateToken({
                     email: req.email,
-                    register_id: req.id,
+                    id: req.id,
                     created_at: req.created_at,
                     user,
                 })
             }
             return generateToken({
                 email: req.email,
-                register_id: req.id,
+                id: req.id,
                 created_at: req.created_at,
             })
         } catch (error) {
@@ -73,6 +73,43 @@ export class User implements iUser {
             from registers
             where email = ${email}`
             return u
+        } catch (error) {
+            console.error(error)
+            Sentry.captureException(error)
+            throw new Error('Internal Server Error')
+        }
+    }
+
+    // deno-lint-ignore require-await
+    async create(register_id: string, username: string): Promise<tUser> {
+        const [reg] = db.sql<tRegister>`
+        select *
+        from registers
+        where id = ${register_id}`
+        if (!reg) throw new Error('Invalid register id')
+        const [u] = db.sql<tUser>`
+        select *
+        from users
+        where username = ${username}`
+        if (u) throw new Error('Username already registered')
+        try {
+            db.sql`
+            insert into users (
+                username
+            )
+            values (
+                ${username}
+            )`
+            const [user] = db.sql<tUser>`
+            select *
+            from users
+            where username = ${username}`
+            if (!user) throw new Error('Internal Server Error')
+            db.sql`
+            update registers
+            set user_id = ${user.id}
+            where id = ${register_id}`
+            return user
         } catch (error) {
             console.error(error)
             Sentry.captureException(error)

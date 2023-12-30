@@ -10,4 +10,5 @@ export interface iUser {
         email: string,
         password: string,
     ): Promise<{ token: string; expires: number }>
+    create(register_id: string, username: string): Promise<tUser>
 }
