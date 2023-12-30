@@ -6,7 +6,8 @@
   "fmt": {
     "singleQuote": true,
     "semiColons": false,
-    "indentWidth": 4
+    "indentWidth": 4,
+    "lineWidth": 120
   },
   "imports": {
     "@hono/": "https://deno.land/x/hono@v3.11.11/",
@@ -16,7 +17,6 @@
     "@supabase": "https://esm.sh/@supabase/supabase-js@2.39.1",
     "@sqlite/": "https://deno.land/x/sqlite3@0.10.0/",
     "@sentry": "npm:@sentry/node",
-    "--------------maps--------------": "--------------maps--------------",
     "@controller": "./src/controllers/default.ts",
     "@error": "./src/sentry.ts",
     "@utils/": "./src/utils/",

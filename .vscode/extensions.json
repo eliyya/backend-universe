@@ -2,6 +2,7 @@
     "recommendations": [
         "dineug.vuerd-vscode", 
         "denoland.vscode-deno",
-        "thebearingedge.vscode-sql-lit"
+        "thebearingedge.vscode-sql-lit",
+        "humao.rest-client"
     ]
 }

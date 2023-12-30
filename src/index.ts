@@ -8,8 +8,7 @@ if (!Deno.env.get('JWT_SECRET')) Deno.exit(1)
 const app = new Hono()
 
 app.use(cors())
-app.use(logger((c) => console.log(c)))
-app.get('/id', (c) => c.text(`Hello`))
+app.use(logger())
 
 import auth from './routes/auth.routes.ts'
 app.route('/auth', auth)
