@@ -1,7 +1,7 @@
 import { Hono } from '@hono/mod.ts'
-import { userController } from '@controller'
 import { Sentry } from '@error'
 import { auth } from '@middlewares/auth.ts'
+import { User } from '@classes/User.ts'
 
 export default new Hono()
     .get('/@me', auth, (ctx) => ctx.json(ctx.var.user))
@@ -13,7 +13,7 @@ export default new Hono()
             return ctx.json({ message: 'Invalid user data' }, 400)
         }
         try {
-            const x = await userController.register(email, password)
+            const x = await User.register(email, password)
             ctx.json(x)
         } catch (error) {
             console.error(error)

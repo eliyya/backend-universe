@@ -29,4 +29,15 @@ export class User {
         const u = await userController.register(email, password)
         return new User(u)
     }
+
+    toJSON() {
+        return {
+            id: this.id,
+            email: this.email,
+            username: this.username,
+            created_at: this.created_at,
+            avatar: this.avatar,
+            displayname: this.displayname,
+        }
+    }
 }

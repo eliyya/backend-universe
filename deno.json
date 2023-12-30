@@ -23,6 +23,7 @@
     "@models/": "./src/models/",
     "@interfaces/": "./src/interfaces/",
     "@middlewares/": "./src/middlewares/",
-    "@db/": "./src/db/"
+    "@db/": "./src/db/",
+    "@classes/": "./src/classes/"
   }
 }
