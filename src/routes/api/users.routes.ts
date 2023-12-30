@@ -46,7 +46,7 @@ export default new Hono()
         >()
         try {
             const x = await User.create(+register_id, username)
-            ctx.json(x)
+            return ctx.json(x)
         } catch (error) {
             console.error(error)
             Sentry.captureException(error)
