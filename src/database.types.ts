@@ -85,32 +85,55 @@ export interface Database {
           }
         ]
       }
-      users: {
+      registers: {
         Row: {
-          avatar: string | null
           created_at: string
-          displayname: string | null
           email: string
           id: number
           password: string
+          user_id: number | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: number
+          password: string
+          user_id?: number | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: number
+          password?: string
+          user_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      users: {
+        Row: {
+          avatar: string | null
+          displayname: string | null
+          id: number
           username: string
         }
         Insert: {
           avatar?: string | null
-          created_at?: string
           displayname?: string | null
-          email: string
           id?: number
-          password: string
           username: string
         }
         Update: {
           avatar?: string | null
-          created_at?: string
           displayname?: string | null
-          email?: string
           id?: number
-          password?: string
           username?: string
         }
         Relationships: []
