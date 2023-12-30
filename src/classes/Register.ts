@@ -5,14 +5,13 @@ import { User } from '@classes/User.ts'
 export class Register {
     id: number
     email: string
-    password: string
     created_at: Date
     user_id: number | null = null
     user: User | null = null
 
     constructor(
-        { created_at, email, id, password, user_id, user }:
-            & Omit<tRegister, 'user_id'>
+        { created_at, email, id, user_id, user }:
+            & Omit<tRegister, 'user_id' | 'password'>
             & {
                 user_id?: number | null
                 user?: tUser | null | User
@@ -20,7 +19,6 @@ export class Register {
     ) {
         this.id = id
         this.email = email
-        this.password = password
         this.created_at = new Date(created_at)
         this.user_id = user_id ?? null
         if (user) {

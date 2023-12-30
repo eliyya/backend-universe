@@ -111,7 +111,7 @@ export interface Database {
           {
             foreignKeyName: "registers_user_id_fkey"
             columns: ["user_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           }

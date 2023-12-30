@@ -9,7 +9,7 @@ export async function decodeToken<expected>(token: string) {
         if (payload.expires as number < Date.now()) {
             throw new Error('Token expired')
         }
-        return payload as expected & { expires: number }
+        return payload as expected & { expires: number; type: tTokenType }
     } catch (error) {
         throw new Error(error.message)
     }

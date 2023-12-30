@@ -5,25 +5,29 @@ import { User } from '@classes/User.ts'
 import { decodeToken } from '@utils/token.ts'
 import { tUserToken } from '@interfaces/User.ts'
 import { TOKEN_TYPES, tTokenType } from '@constants'
+import { zJSONValidator } from '@middlewares/validators.ts'
+import z from '@zod/index.ts'
 
 export default new Hono()
     .get('/@me', auth, (ctx) => ctx.json(ctx.var.user))
-    .post('/register', async (ctx) => {
-        const { email, password } = await ctx.req.parseBody<
-            { email: string; password: string }
-        >()
-        if (!email || !password) {
-            return ctx.json({ message: 'Invalid user data' }, 400)
-        }
-        try {
-            const x = await User.register(email, password)
-            ctx.json(x)
-        } catch (error) {
-            console.error(error)
-            Sentry.captureException(error)
-            return ctx.json({ message: 'Internal Server Error' }, 500)
-        }
-    })
+    .post(
+        '/register',
+        zJSONValidator(z.object({
+            email: z.string().email(),
+            password: z.string().min(8),
+        })),
+        async (ctx) => {
+            try {
+                const { email, password } = ctx.var.body
+                const x = await User.register(email, password)
+                return ctx.json(x)
+            } catch (error) {
+                console.error(error)
+                Sentry.captureException(error)
+                return ctx.json({ message: 'Internal Server Error' }, 500)
+            }
+        },
+    )
     .post('/create', async (ctx) => {
         const authorization = ctx.req.header('Authorization')
         if (!authorization) {
