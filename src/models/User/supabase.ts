@@ -79,7 +79,7 @@ export class User implements iUser {
         })
     }
 
-    async create(register_id: string, username: string): Promise<tUser> {
+    async create(register_id: number, username: string): Promise<tUser> {
         const req = await supabase.from('registers').select().eq(
             'id',
             register_id,

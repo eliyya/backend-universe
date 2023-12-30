@@ -1,10 +1,10 @@
-import { jwtVerify, SignJWT } from '@jose/index.ts'
+import { Jwt } from '@hono/utils/jwt/index.ts'
 
-const secret = new TextEncoder().encode(Deno.env.get('JWT_SECRET') as string)
+const secret = Deno.env.get('JWT_SECRET') as string
 
 export async function decodeToken<expected>(token: string) {
     try {
-        const { payload } = await jwtVerify(token, secret)
+        const { payload } = await Jwt.verify(token, secret)
         if (payload.expires as number < Date.now()) {
             throw new Error('Token expired')
         }
@@ -16,8 +16,6 @@ export async function decodeToken<expected>(token: string) {
 
 export async function generateToken(data: { [key: string]: any }) {
     const expires = Date.now() + 60 * 60 * 24
-    const token = await new SignJWT({ ...data, expires })
-        .setProtectedHeader({ alg: 'HS256' })
-        .sign(secret)
+    const token = await Jwt.sign({ ...data, expires }, secret)
     return { token, expires }
 }

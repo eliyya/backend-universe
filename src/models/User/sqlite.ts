@@ -81,7 +81,7 @@ export class User implements iUser {
     }
 
     // deno-lint-ignore require-await
-    async create(register_id: string, username: string): Promise<tUser> {
+    async create(register_id: number, username: string): Promise<tUser> {
         const [reg] = db.sql<tRegister>`
         select *
         from registers

@@ -2,6 +2,8 @@ import { Hono } from '@hono/mod.ts'
 import { Sentry } from '@error'
 import { auth } from '@middlewares/auth.ts'
 import { User } from '@classes/User.ts'
+import { decodeToken } from '@utils/token.ts'
+import { tUserToken } from '@interfaces/User.ts'
 
 export default new Hono()
     .get('/@me', auth, (ctx) => ctx.json(ctx.var.user))
@@ -22,11 +24,23 @@ export default new Hono()
         }
     })
     .post('/create', async (ctx) => {
+        const authorization = ctx.req.header('Authorization')
+        if (!authorization) {
+            return ctx.json({ message: 'Unauthorized' }, 401)
+        }
+        const [type, token] = authorization.split(' ')
+        if (type !== 'Register') {
+            return ctx.json({ message: 'Unauthorized' }, 401)
+        }
+        const { expires } = await decodeToken<tUserToken>(token)
+        if (expires < Date.now()) {
+            return ctx.json({ message: 'Unauthorized' }, 401)
+        }
         const { username, register_id } = await ctx.req.parseBody<
             { username: string; register_id: string }
         >()
         try {
-            const x = await User.create(register_id, username)
+            const x = await User.create(+register_id, username)
             ctx.json(x)
         } catch (error) {
             console.error(error)

@@ -27,7 +27,7 @@ export class User {
         return u
     }
 
-    static async create(register_id: string, username: string): Promise<User> {
+    static async create(register_id: number, username: string): Promise<User> {
         return new User(await userController.create(register_id, username))
     }
 
