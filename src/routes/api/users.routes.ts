@@ -14,7 +14,7 @@ export default new Hono()
         }
         try {
             const x = await userController.register(email, password)
-            ctx.body = x
+            ctx.json(x)
         } catch (error) {
             console.error(error)
             Sentry.captureException(error)
