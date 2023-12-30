@@ -14,7 +14,7 @@ export async function decodeToken<expected>(token: string) {
     }
 }
 
-export async function generateToken(data: { [key: string]: any }) {
+export async function generateToken(data: { [key: string]: unknown }) {
     const expires = Date.now() + 60 * 60 * 24
     const token = await Jwt.sign({ ...data, expires }, secret)
     return { token, expires }
