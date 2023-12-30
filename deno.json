@@ -24,6 +24,7 @@
     "@interfaces/": "./src/interfaces/",
     "@middlewares/": "./src/middlewares/",
     "@db/": "./src/db/",
-    "@classes/": "./src/classes/"
+    "@classes/": "./src/classes/",
+    "@constants": "./src/constants.ts"
   }
 }

@@ -4,6 +4,7 @@ import supabase from '@db/supabase.ts'
 import { iUser, tRegister, tUser } from '@interfaces/User.ts'
 import { generateToken } from '@utils/token.ts'
 import { Sentry } from '@error'
+import { TOKEN_TYPES, tTokenType } from '@constants'
 
 export class User implements iUser {
     async get(id: number): Promise<tUser> {
@@ -14,8 +15,6 @@ export class User implements iUser {
             throw new Error(req.error.message)
         }
         const [u] = req.data
-        // @ts-ignore
-        delete u.password
         return u
     }
 
@@ -48,10 +47,16 @@ export class User implements iUser {
         }
     }
 
+    /**
+     * @param {string} email User email
+     * @param {string} password User password
+     * @returns {Promise<tUserToken>} Token and expires
+     * @throws {Error} Invalid user or password
+     */
     async login(
         email: string,
         password: string,
-    ): Promise<{ token: string; expires: number }> {
+    ): Promise<{ token: string; expires: number; type: tTokenType }> {
         const req = await supabase.from('registers').select().eq('email', email)
         if (req.error) {
             console.error(req.error)
@@ -70,12 +75,14 @@ export class User implements iUser {
                 id: u.id,
                 created_at: u.created_at,
                 user,
+                type: TOKEN_TYPES.Bearer,
             })
         }
         return generateToken({
             email: u.email,
             id: u.id,
             created_at: u.created_at,
+            type: TOKEN_TYPES.Register,
         })
     }
 

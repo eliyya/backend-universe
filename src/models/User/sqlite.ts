@@ -4,6 +4,7 @@ import db, { sql } from '@db/sqlite.ts'
 import { iUser, tRegister, tUser } from '@interfaces/User.ts'
 import { generateToken } from '@utils/token.ts'
 import { Sentry } from '@error'
+import { TOKEN_TYPES, tTokenType } from '@constants'
 
 export class User implements iUser {
     // deno-lint-ignore require-await
@@ -19,7 +20,7 @@ export class User implements iUser {
     async login(
         email: string,
         password: string,
-    ): Promise<{ token: string; expires: number }> {
+    ): Promise<{ token: string; expires: number; type: tTokenType }> {
         try {
             const [req] = db.sql<tRegister>`
             select *
@@ -36,12 +37,14 @@ export class User implements iUser {
                     id: req.id,
                     created_at: req.created_at,
                     user,
+                    type: TOKEN_TYPES.Bearer,
                 })
             }
             return generateToken({
                 email: req.email,
                 id: req.id,
                 created_at: req.created_at,
+                type: TOKEN_TYPES.Register,
             })
         } catch (error) {
             console.error(error)

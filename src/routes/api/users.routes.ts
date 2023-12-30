@@ -4,6 +4,7 @@ import { auth } from '@middlewares/auth.ts'
 import { User } from '@classes/User.ts'
 import { decodeToken } from '@utils/token.ts'
 import { tUserToken } from '@interfaces/User.ts'
+import { TOKEN_TYPES, tTokenType } from '@constants'
 
 export default new Hono()
     .get('/@me', auth, (ctx) => ctx.json(ctx.var.user))
@@ -28,8 +29,8 @@ export default new Hono()
         if (!authorization) {
             return ctx.json({ message: 'Unauthorized' }, 401)
         }
-        const [type, token] = authorization.split(' ')
-        if (type !== 'Register') {
+        const [type, token] = authorization.split(' ') as [tTokenType, string]
+        if (type !== TOKEN_TYPES.Register) {
             return ctx.json({ message: 'Unauthorized' }, 401)
         }
         const { expires } = await decodeToken<tUserToken>(token)

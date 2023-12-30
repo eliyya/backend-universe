@@ -1,4 +1,5 @@
 import { Jwt } from '@hono/utils/jwt/index.ts'
+import { tTokenType } from '@constants'
 
 const secret = Deno.env.get('JWT_SECRET') as string
 
@@ -14,8 +15,8 @@ export async function decodeToken<expected>(token: string) {
     }
 }
 
-export async function generateToken(data: { [key: string]: unknown }) {
+export async function generateToken(data: { [key: string]: unknown } & { type: tTokenType }) {
     const expires = Date.now() + 60 * 60 * 24
     const token = await Jwt.sign({ ...data, expires }, secret)
-    return { token, expires }
+    return { token, expires, type: data.type }
 }
