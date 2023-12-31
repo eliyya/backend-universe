@@ -6,7 +6,7 @@ import { generateToken } from '@utils/token.ts'
 import { Sentry } from '@error'
 import { TOKEN_TYPES, tTokenType } from '@constants'
 
-export class User implements iUser {
+export class UserModel implements iUser {
     async get(id: number): Promise<tUser> {
         const req = await supabase
             .from('users')
@@ -21,33 +21,32 @@ export class User implements iUser {
         return u
     }
 
+    /**
+     * @throws {Error} Email already registered
+     */
     async register(email: string, password: string): Promise<tRegister> {
         const parsedEmail = z.string().email().safeParse(email)
         if (!parsedEmail.success) throw new Error('Invalid email')
-        try {
-            const req = await supabase
-                .from('registers')
-                .select()
-                .eq('email', email)
-            if (req.error) {
-                console.error(req.error)
-                Sentry.captureException(req.error)
-                throw new Error(req.error.message)
-            }
-            if (req.data?.length) throw new Error('Email already registered')
-            const r = await supabase
-                .from('registers')
-                .insert({ email, password: await hash(password) })
-                .select()
-            if (r.error) {
-                console.error(r.error)
-                Sentry.captureException(r.error)
-                throw new Error(r.error.message)
-            }
-            return r.data[0]
-        } catch (error) {
-            throw new Error(error.message)
+        const req = await supabase
+            .from('registers')
+            .select()
+            .eq('email', email)
+        if (req.error) {
+            console.error(req.error)
+            Sentry.captureException(req.error)
+            throw new Error(req.error.message)
         }
+        if (req.data?.length) throw new Error('Email already registered')
+        const r = await supabase
+            .from('registers')
+            .insert({ email, password: await hash(password) })
+            .select()
+        if (r.error) {
+            console.error(r.error)
+            Sentry.captureException(r.error)
+            throw new Error(r.error.message)
+        }
+        return r.data[0]
     }
 
     /**
@@ -93,6 +92,8 @@ export class User implements iUser {
     }
 
     async create(register_id: number, username: string): Promise<tUser> {
+        console.log(register_id)
+
         const req = await supabase
             .from('registers')
             .select()
@@ -134,5 +135,23 @@ export class User implements iUser {
             throw new Error(r.error.message)
         }
         return user
+    }
+
+    /**
+     * @throws {Error} Register not found
+     */
+    async getRegister(id: number): Promise<tRegister> {
+        const r = await supabase
+            .from('registers')
+            .select()
+            .eq('id', id)
+        if (r.error) {
+            console.error(r.error)
+            Sentry.captureException(r.error)
+            throw new Error(r.error.message)
+        }
+        if (!r.data?.length) throw new Error('Register not found')
+        const [reg] = r.data
+        return reg
     }
 }

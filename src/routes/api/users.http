@@ -5,3 +5,18 @@ Content-Type: application/json
     "email": "anya@forger.com",
     "password": "password"
 }
+
+###
+
+POST http://localhost:8000/api/users/create
+Content-Type: application/json
+Authorization: Register eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFueWFAZm9yZ2VyLmNvbSIsImlkIjoyLCJjcmVhdGVkX2F0IjoiMjAyMy0xMi0zMFQwNzoyODoyMC4yNDQxMzgrMDA6MDAiLCJ0eXBlIjoiUmVnaXN0ZXIiLCJleHBpcmVzIjoxNzA0MDg1NzM2NjExfQ.tlSxYRciWjyi2Lb00aUuaZThJaXaiDtvU8qc-07EpkY
+
+{
+    "username": "Anya"
+}
+
+###
+GET http://localhost:8000/api/users/@me
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFueWFAZm9yZ2VyLmNvbSIsImlkIjoyLCJjcmVhdGVkX2F0IjoiMjAyMy0xMi0zMFQwNzoyODoyMC4yNDQxMzgrMDA6MDAiLCJ1c2VyIjp7ImlkIjoxLCJ1c2VybmFtZSI6IkFueWEiLCJhdmF0YXIiOm51bGwsImRpc3BsYXluYW1lIjpudWxsfSwidHlwZSI6IkJlYXJlciIsImV4cGlyZXMiOjE3MDQwOTE2OTAzNzB9.jniNQFBNMFYCxC0vCTVN0gZe0QjvP0fF2cYxEwUMRxE

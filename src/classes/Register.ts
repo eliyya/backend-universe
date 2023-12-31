@@ -29,6 +29,10 @@ export class Register {
             }
         }
     }
+
+    /**
+     * @throws {Error} Email already registered
+     */
     static async register(
         { email, password, username }: {
             email: string
@@ -42,5 +46,14 @@ export class Register {
             return new Register({ ...reg, user: u })
         }
         return new Register(reg)
+    }
+
+    static async get(id: number): Promise<Register> {
+        return new Register(await userController.getRegister(id))
+    }
+
+    async getUser(): Promise<User | null> {
+        if (!this.user_id) return null
+        return await User.get(this.user_id)
     }
 }

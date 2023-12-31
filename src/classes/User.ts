@@ -22,12 +22,17 @@ export class User {
         return new User(u)
     }
 
+    /**
+     * @throws {Error} Email already registered
+     */
     static async register(email: string, password: string): Promise<Register> {
         const u = await Register.register({ email, password })
         return u
     }
 
     static async create(register_id: number, username: string): Promise<User> {
+        console.log('cu', register_id)
+
         return new User(await userController.create(register_id, username))
     }
 

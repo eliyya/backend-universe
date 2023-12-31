@@ -22,34 +22,43 @@ export default new Hono()
                 const x = await User.register(email, password)
                 return ctx.json(x)
             } catch (error) {
+                if (error instanceof Error && error.message === 'Email already registered') {
+                    return ctx.json({ message: error.message }, 409)
+                }
                 console.error(error)
                 Sentry.captureException(error)
                 return ctx.json({ message: 'Internal Server Error' }, 500)
             }
         },
     )
-    .post('/create', async (ctx) => {
-        const authorization = ctx.req.header('Authorization')
-        if (!authorization) {
-            return ctx.json({ message: 'Unauthorized' }, 401)
-        }
-        const [type, token] = authorization.split(' ') as [tTokenType, string]
-        if (type !== TOKEN_TYPES.Register) {
-            return ctx.json({ message: 'Unauthorized' }, 401)
-        }
-        const { expires } = await decodeToken<tUserToken>(token)
-        if (expires < Date.now()) {
-            return ctx.json({ message: 'Unauthorized' }, 401)
-        }
-        const { username, register_id } = await ctx.req.parseBody<
-            { username: string; register_id: string }
-        >()
-        try {
-            const x = await User.create(+register_id, username)
-            return ctx.json(x)
-        } catch (error) {
-            console.error(error)
-            Sentry.captureException(error)
-            return ctx.json({ message: 'Internal Server Error' }, 500)
-        }
-    })
+    .post(
+        '/create',
+        zJSONValidator(z.object({
+            username: z.string(),
+        })),
+        async (ctx) => {
+            const authorization = ctx.req.header('Authorization')
+            if (!authorization) {
+                return ctx.json({ message: 'Unauthorized' }, 401)
+            }
+            const [type, token] = authorization.split(' ') as [tTokenType, string]
+            if (type !== TOKEN_TYPES.Register) {
+                return ctx.json({ message: 'Unauthorized' }, 401)
+            }
+            const { expires, id } = await decodeToken<tUserToken>(token)
+            if (expires < Date.now()) {
+                return ctx.json({ message: 'Unauthorized' }, 401)
+            }
+            const { username } = ctx.var.body
+            try {
+                console.log('api', id)
+
+                const x = await User.create(+id, username)
+                return ctx.json(x)
+            } catch (error) {
+                console.error(error)
+                Sentry.captureException(error)
+                return ctx.json({ message: 'Internal Server Error' }, 500)
+            }
+        },
+    )
