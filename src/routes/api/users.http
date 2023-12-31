@@ -1,4 +1,7 @@
-POST http://localhost:8000/api/users/register
+@port=8000
+
+# @name register
+POST http://localhost:{{port}}/api/users/register
 Content-Type: application/json
 
 {
@@ -7,8 +10,8 @@ Content-Type: application/json
 }
 
 ###
-
-POST http://localhost:8000/api/users/create
+# @name create
+POST http://localhost:{{port}}/api/users/create
 Content-Type: application/json
 Authorization: Register eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFueWFAZm9yZ2VyLmNvbSIsImlkIjoyLCJjcmVhdGVkX2F0IjoiMjAyMy0xMi0zMFQwNzoyODoyMC4yNDQxMzgrMDA6MDAiLCJ0eXBlIjoiUmVnaXN0ZXIiLCJleHBpcmVzIjoxNzA0MDg1NzM2NjExfQ.tlSxYRciWjyi2Lb00aUuaZThJaXaiDtvU8qc-07EpkY
 
@@ -17,6 +20,7 @@ Authorization: Register eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFueWF
 }
 
 ###
-GET http://localhost:8000/api/users/@me
+# @name @me
+GET http://localhost:{{port}}/api/users/@me
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFueWFAZm9yZ2VyLmNvbSIsImlkIjoyLCJjcmVhdGVkX2F0IjoiMjAyMy0xMi0zMFQwNzoyODoyMC4yNDQxMzgrMDA6MDAiLCJ1c2VyIjp7ImlkIjoxLCJ1c2VybmFtZSI6IkFueWEiLCJhdmF0YXIiOm51bGwsImRpc3BsYXluYW1lIjpudWxsfSwidHlwZSI6IkJlYXJlciIsImV4cGlyZXMiOjE3MDQwOTE2OTAzNzB9.jniNQFBNMFYCxC0vCTVN0gZe0QjvP0fF2cYxEwUMRxE

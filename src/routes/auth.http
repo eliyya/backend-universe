@@ -1,4 +1,7 @@
-POST http://localhost:8000/auth/authorize
+@port=8000
+
+# @name authorize
+POST http://localhost:{{port}}/auth/authorize
 Content-Type: application/json
 
 {
@@ -7,6 +10,6 @@ Content-Type: application/json
 }
 
 ###
-
-POST http://localhost:8000/auth/refresh
+# @name refresh
+POST http://localhost:{{port}}/auth/refresh
 Authorization: Register eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFueWFAZm9yZ2VyLmNvbSIsImlkIjoyLCJjcmVhdGVkX2F0IjoiMjAyMy0xMi0zMFQwNzoyODoyMC4yNDQxMzgrMDA6MDAiLCJ0eXBlIjoiUmVnaXN0ZXIiLCJleHBpcmVzIjoxNzA0MDg1NzM2NjExfQ.tlSxYRciWjyi2Lb00aUuaZThJaXaiDtvU8qc-07EpkY
