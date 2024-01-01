@@ -87,8 +87,6 @@ export class UserModel implements iUserModel {
     }
 
     async create(register_id: number, username: string): Promise<tUser> {
-        console.log(register_id)
-
         const req = await supabase
             .from('registers')
             .select()
@@ -176,8 +174,6 @@ export class UserModel implements iUserModel {
             throw new Error(o.error.message)
         }
         const [old] = o.data
-        console.log('old', old)
-
         if (old.avatar) {
             const d = await supabase
                 .storage
@@ -201,7 +197,6 @@ export class UserModel implements iUserModel {
             .update({ avatar: a.data.path })
             .eq('id', id)
             .select()
-        console.log(a.data.path)
         if (u.error) {
             console.error(u.error)
             throw new Error(u.error.message)
