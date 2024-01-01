@@ -14,5 +14,7 @@ import auth from './routes/auth.routes.ts'
 app.route('/auth', auth)
 import api from './routes/api.routes.ts'
 app.route('/api', api)
+import img from './routes/img.routes.ts'
+app.route('/img', img)
 
 Deno.serve(app.fetch)

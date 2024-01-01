@@ -1,12 +1,12 @@
 import { z } from '@zod/mod.ts'
 import { compare, hash } from '@utils/hash.ts'
 import db, { sql } from '@db/sqlite.ts'
-import { iUser, tRegister, tUser } from '@interfaces/User.ts'
+import { iUserModel, tRegister, tUser } from '@interfaces/User.ts'
 import { generateToken } from '@utils/token.ts'
 import { Sentry } from '@error'
 import { TOKEN_TYPES, tTokenType } from '@constants'
 
-export class User implements iUser {
+export class User implements iUserModel {
     // deno-lint-ignore require-await
     async get(id: number): Promise<tUser> {
         const u = sql.get<tUser>`
@@ -118,5 +118,21 @@ export class User implements iUser {
             Sentry.captureException(error)
             throw new Error('Internal Server Error')
         }
+    }
+
+    getRegister(
+        id: number,
+    ): Promise<{ created_at: string; email: string; id: number; password: string; user_id: number | null }> {
+        throw new Error('Method not implemented.')
+    }
+
+    update(
+        options: { username?: string | undefined; displayname?: string | undefined },
+    ): Promise<{ avatar: string | null; displayname: string | null; id: number; username: string }> {
+        throw new Error('Method not implemented.')
+    }
+
+    setAvatar(id: number, avatar: File): Promise<tUser> {
+        throw new Error('Method not implemented.')
     }
 }

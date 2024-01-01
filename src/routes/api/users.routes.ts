@@ -1,6 +1,5 @@
 import { Hono } from '@hono/mod.ts'
 import { Sentry } from '@error'
-import { auth } from '@middlewares/auth.ts'
 import { User } from '@classes/User.ts'
 import { decodeToken } from '@utils/token.ts'
 import { tUserToken } from '@interfaces/User.ts'
@@ -8,27 +7,27 @@ import { TOKEN_TYPES, tTokenType } from '@constants'
 import { zJSONValidator } from '@middlewares/validators.ts'
 import z from '@zod/index.ts'
 
+import me from './users/@me.ts'
+import { safe } from '@middlewares/safe.ts'
 export default new Hono()
-    .get('/@me', auth, (ctx) => ctx.json(ctx.var.user))
     .post(
         '/register',
         zJSONValidator(z.object({
             email: z.string().email(),
             password: z.string().min(8),
         })),
-        async (ctx) => {
-            try {
-                const { email, password } = ctx.var.body
-                const x = await User.register(email, password)
-                return ctx.json(x)
-            } catch (error) {
-                if (error instanceof Error && error.message === 'Email already registered') {
-                    return ctx.json({ message: error.message }, 409)
-                }
-                console.error(error)
-                Sentry.captureException(error)
-                return ctx.json({ message: 'Internal Server Error' }, 500)
+        safe((error, ctx) => {
+            if (error.message.includes('Email already registered')) {
+                return ctx.json({ message: error.message }, 409)
             }
+            console.error(error)
+            Sentry.captureException(error)
+            return ctx.json({ message: 'Internal Server Error' }, 500)
+        }),
+        async (ctx) => {
+            const { email, password } = ctx.var.body
+            const x = await User.register(email, password)
+            return ctx.json(x)
         },
     )
     .post(
@@ -50,15 +49,8 @@ export default new Hono()
                 return ctx.json({ message: 'Unauthorized' }, 401)
             }
             const { username } = ctx.var.body
-            try {
-                console.log('api', id)
-
-                const x = await User.create(+id, username)
-                return ctx.json(x)
-            } catch (error) {
-                console.error(error)
-                Sentry.captureException(error)
-                return ctx.json({ message: 'Internal Server Error' }, 500)
-            }
+            const x = await User.create(+id, username)
+            return ctx.json(x)
         },
     )
+    .route('/@me', me)

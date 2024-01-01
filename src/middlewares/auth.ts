@@ -27,8 +27,11 @@ export const auth: MiddlewareHandler<{ Variables: { user: User } }> = async (
         }
         const u = await User.get(user.id)
         ctx.set('user', u)
-        next()
+        return await next()
     } catch (error) {
+        if (error instanceof Error && error.message === 'Token expired') {
+            return ctx.json({ message: 'Unauthorized' }, 401)
+        }
         console.error(error)
         Sentry.captureException(error)
         return ctx.json({ message: 'Internal Server Error' }, 500)

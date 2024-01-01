@@ -1,12 +1,12 @@
 import { z } from '@zod/mod.ts'
 import { compare, hash } from '@utils/hash.ts'
 import supabase from '@db/supabase.ts'
-import { iUser, tRegister, tUser } from '@interfaces/User.ts'
+import { iUserModel, tRegister, tUser } from '@interfaces/User.ts'
 import { generateToken } from '@utils/token.ts'
 import { Sentry } from '@error'
 import { TOKEN_TYPES, tTokenType } from '@constants'
 
-export class UserModel implements iUser {
+export class UserModel implements iUserModel {
     async get(id: number): Promise<tUser> {
         const req = await supabase
             .from('users')
@@ -153,5 +153,70 @@ export class UserModel implements iUser {
         if (!r.data?.length) throw new Error('Register not found')
         const [reg] = r.data
         return reg
+    }
+
+    async update(
+        { id, displayname, username }: { username?: string; displayname?: string | null; id: number },
+    ): Promise<tUser> {
+        const u = await supabase
+            .from('users')
+            .update({ displayname, username })
+            .eq('id', id)
+            .select()
+        if (u.error) {
+            console.error(u.error)
+            Sentry.captureException(u.error)
+            throw new Error(u.error.message)
+        }
+        const [user] = u.data
+        return user
+    }
+
+    async setAvatar(id: number, avatar: File): Promise<tUser> {
+        const o = await supabase
+            .from('users')
+            .select()
+            .eq('id', id)
+        if (o.error) {
+            console.error(o.error)
+            Sentry.captureException(o.error)
+            throw new Error(o.error.message)
+        }
+        const [old] = o.data
+        console.log('old', old)
+
+        if (old.avatar) {
+            const d = await supabase
+                .storage
+                .from('avatars')
+                .move(old.avatar, `olds/${old.avatar}.png`)
+            if (d.error) {
+                console.error(d.error)
+                Sentry.captureException(d.error)
+                throw new Error(d.error.message)
+            }
+        }
+        const a = await supabase
+            .storage
+            .from('avatars')
+            .upload(`${id}-${Date.now()}.png`, avatar)
+        if (a.error) {
+            console.error(a.error)
+            Sentry.captureException(a.error)
+            throw new Error(a.error.message)
+        }
+        const u = await supabase
+            .from('users')
+            .update({ avatar: a.data.path })
+            .eq('id', id)
+            .select()
+        console.log(a.data.path)
+        if (u.error) {
+            console.error(u.error)
+            Sentry.captureException(u.error)
+            throw new Error(u.error.message)
+        }
+        const [user] = u.data
+        return user
     }
 }

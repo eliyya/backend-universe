@@ -11,7 +11,7 @@ export type tUserToken = {
     type: tTokenType
 }
 
-export interface iUser {
+export interface iUserModel {
     get(id: number): Promise<tUser>
     register(email: string, password: string): Promise<tRegister>
     login(
@@ -20,4 +20,6 @@ export interface iUser {
     ): Promise<{ token: string; expires: number; type: tTokenType }>
     create(register_id: number, username: string): Promise<tUser>
     getRegister(id: number): Promise<tRegister>
+    update(options: { username?: string; displayname?: string | null }): Promise<tUser>
+    setAvatar(id: number, avatar: File): Promise<tUser>
 }

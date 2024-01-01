@@ -1,6 +1,6 @@
 import { Database, RestBindParameters } from '@sqlite/mod.ts'
 
-const db = new Database('database.db')
+const db = new Database('sql/database.db')
 
 db.sql`
 -- Tabla 'registers'

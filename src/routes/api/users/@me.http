@@ -1,0 +1,18 @@
+@port=8000
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFueWFAZm9yZ2VyLmNvbSIsImlkIjoyLCJjcmVhdGVkX2F0IjoiMjAyMy0xMi0zMFQwNzoyODoyMC4yNDQxMzgrMDA6MDAiLCJ1c2VyIjp7ImlkIjoxLCJ1c2VybmFtZSI6IkFuZXdVc2VybmFtZSIsImRpc3BsYXluYW1lIjoiQW5ld0Rpc3BsYXluYW1lIiwiYXZhdGFyIjpudWxsfSwidHlwZSI6IkJlYXJlciIsImV4cGlyZXMiOjE3MDQyMTU4NzY4Njh9.i4gllZSYjZTCBOKfC8YmltOjlAezgbgkdJTV5RF8-O4
+
+# @name getCurrent
+GET http://localhost:{{port}}/api/users/@me
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+# @name editCurrent
+PATCH http://localhost:{{port}}/api/users/@me
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "username": "Anya",
+    "displayname": null
+}
