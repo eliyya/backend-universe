@@ -7,29 +7,19 @@ import { TOKEN_TYPES, tTokenType } from '@constants'
 import { zJSONValidator } from '@middlewares/validators.ts'
 import z from '@zod/index.ts'
 
-import me from './users/@me.ts'
-import { safe } from '@middlewares/safe.ts'
-export default new Hono()
-    .post(
-        '/register',
-        zJSONValidator(z.object({
-            email: z.string().email(),
-            password: z.string().min(8),
-        })),
-        safe((error, ctx) => {
-            if (error.message.includes('Email already registered')) {
-                return ctx.json({ message: error.message }, 409)
-            }
-            console.error(error)
-            Sentry.captureException(error)
-            return ctx.json({ message: 'Internal Server Error' }, 500)
-        }),
-        async (ctx) => {
-            const { email, password } = ctx.var.body
-            const x = await User.register(email, password)
-            return ctx.json(x)
-        },
-    )
+const usersApi = new Hono()
+usersApi.post(
+    '/register',
+    zJSONValidator(z.object({
+        email: z.string().email(),
+        password: z.string().min(8),
+    })),
+    async (ctx) => {
+        const { email, password } = ctx.var.body
+        const x = await User.register(email, password)
+        return ctx.json(x)
+    },
+)
     .post(
         '/create',
         zJSONValidator(z.object({
@@ -53,4 +43,8 @@ export default new Hono()
             return ctx.json(x)
         },
     )
-    .route('/@me', me)
+
+import me from './users/@me.ts'
+usersApi.route('/@me', me)
+
+export default usersApi

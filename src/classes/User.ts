@@ -7,7 +7,6 @@ export class User {
     #username: string
     #avatar: string | null = null
     #displayname: string | null = null
-    #avatarUrl: string | null = null
 
     get username() {
         return this.#username
@@ -44,18 +43,27 @@ export class User {
     }
 
     static async create(register_id: number, username: string): Promise<User> {
-        console.log('cu', register_id)
-
         return new User(await userController.create(register_id, username))
     }
 
+    /**
+     * @throws {Error} Username already registered
+     */
     async update(
         { username, displayname }: { username?: string; displayname?: string | null },
     ): Promise<User> {
-        const n = await userController.update({ username, displayname, id: this.id })
-        if (n.username) this.#username = n.username
-        if (n.displayname) this.#displayname = n.displayname
-        return this
+        try {
+            const n = await userController.update({ username, displayname, id: this.id })
+            this.#username = n.username
+            this.#displayname = n.displayname
+            return this
+        } catch (error) {
+            if (error.message === 'Username already registered') {
+                throw new Error(error.message)
+            }
+            console.error(error)
+            throw new Error('Error updating user', { cause: error })
+        }
     }
 
     async setAvatar(avatar: File): Promise<User> {

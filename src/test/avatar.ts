@@ -1,8 +1,8 @@
 import { imgsController } from '@controller'
 
 const form = new FormData()
-const avatar = await Deno.readFile('./src/public/test.png')
-const file = new File([avatar], 'test.png', { type: 'image/png' })
+const avatar = await Deno.readFile('./src/public/test2.png')
+const file = new File([avatar], 'test2.png', { type: 'image/png' })
 form.append('avatar', file, 'avatar.png')
 // form.set('avatar', 'avatar.png')
 
@@ -11,7 +11,7 @@ const r = await fetch('http://localhost:8000/api/users/@me/avatar', {
     body: form,
     headers: {
         Authorization:
-            'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFueWFAZm9yZ2VyLmNvbSIsImlkIjoyLCJjcmVhdGVkX2F0IjoiMjAyMy0xMi0zMFQwNzoyODoyMC4yNDQxMzgrMDA6MDAiLCJ1c2VyIjp7ImlkIjoxLCJ1c2VybmFtZSI6IkFuZXdVc2VybmFtZSIsImRpc3BsYXluYW1lIjoiQW5ld0Rpc3BsYXluYW1lIiwiYXZhdGFyIjpudWxsfSwidHlwZSI6IkJlYXJlciIsImV4cGlyZXMiOjE3MDQyMTU4NzY4Njh9.i4gllZSYjZTCBOKfC8YmltOjlAezgbgkdJTV5RF8-O4',
+            'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Imthbm5hQGtvYmF5YXNoaS5jb20iLCJpZCI6MywiY3JlYXRlZF9hdCI6IjIwMjQtMDEtMDFUMjA6MzY6MTMuMDUzMDMzKzAwOjAwIiwidXNlciI6eyJpZCI6MiwidXNlcm5hbWUiOiJLYW5uYSIsImF2YXRhciI6bnVsbCwiZGlzcGxheW5hbWUiOm51bGx9LCJ0eXBlIjoiQmVhcmVyIiwiZXhwaXJlcyI6MTcwNDIyNzg5NDAyNX0.DvpeJl_b_s26FwjUpS6TyqUODmyff9oIzplPu8XS3ss',
     },
 })
 console.log(r)
