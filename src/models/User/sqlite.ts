@@ -1,68 +1,74 @@
 import { z } from '@zod/mod.ts'
 import { compare, hash } from '@utils/hash.ts'
-import db, { sql } from '@db/sqlite.ts'
+import db from '@db/sqlite.ts'
 import { iUserModel, tRegister, tUser } from '@interfaces/User.ts'
 import { generateToken } from '@utils/token.ts'
-import { Sentry } from '@error'
 import { TOKEN_TYPES, tTokenType } from '@constants'
 
 export class User implements iUserModel {
-    // deno-lint-ignore require-await
-    async get(id: number): Promise<tUser> {
-        const u = sql.get<tUser>`
-        select id, created_at, username, displayname, avatar, email 
+    /**
+     * @throws {Error} Not found
+     */
+    get(id: number): Promise<tUser> {
+        const u = db.sql<tUser>`
+        select * 
         from users 
         where id = ${id}`
-        if (!u) throw new Error('not found')
-        return u
+        if (!u.length) throw new Error('Not found')
+        return Promise.resolve(u[0])
     }
 
+    /**
+     * @param email
+     * @param password
+     * @returns
+     * @throws {Error} Invalid user or password
+     */
     async login(
         email: string,
         password: string,
     ): Promise<{ token: string; expires: number; type: tTokenType }> {
-        try {
-            const [req] = db.sql<tRegister>`
+        const [req] = db.sql<tRegister>`
             select *
             from registers
             where email = ${email}`
-            if (!req) throw new Error('Invalid user or password')
-            if (!(await compare(password, req.password))) {
-                throw new Error('Invalid user or password')
-            }
-            if (req.user_id) {
-                const user = await this.get(req.user_id)
-                return generateToken({
-                    email: req.email,
-                    id: req.id,
-                    created_at: req.created_at,
-                    user,
-                    type: TOKEN_TYPES.Bearer,
-                })
-            }
+        if (!req) throw new Error('Invalid user or password')
+        if (!(await compare(password, req.password))) {
+            throw new Error('Invalid user or password')
+        }
+        if (req.user_id) {
+            const user = await this.get(req.user_id)
             return generateToken({
                 email: req.email,
                 id: req.id,
                 created_at: req.created_at,
-                type: TOKEN_TYPES.Register,
+                user,
+                type: TOKEN_TYPES.Bearer,
             })
-        } catch (error) {
-            console.error(error)
-            Sentry.captureException(error)
-            throw new Error('Internal Server Error')
         }
+        return generateToken({
+            email: req.email,
+            id: req.id,
+            created_at: req.created_at,
+            type: TOKEN_TYPES.Register,
+        })
     }
 
+    /**
+     * @param email
+     * @param password
+     * @returns
+     * @throws {Error} Email already registered
+     */
     async register(email: string, password: string): Promise<tRegister> {
         const parsedEmail = z.string().email().safeParse(email)
         if (!parsedEmail.success) throw new Error('Invalid email')
-        try {
-            const [r] = db.sql<tRegister>`
+        const [r] = db.sql<tRegister>`
             select *
             from registers
             where email = ${email}`
-            if (r) throw new Error('Email already registered')
-            db.sql`
+        if (r) throw new Error('Email already registered')
+        const [u] = db.sql<tRegister>`
             INSERT INTO registers (
                 email, 
                 password
@@ -70,69 +76,112 @@ export class User implements iUserModel {
             VALUES (
                 ${email},
                 ${await hash(password)}
-            )`
-            const [u] = db.sql<tRegister>`
-            select *
-            from registers
-            where email = ${email}`
-            return u
-        } catch (error) {
-            console.error(error)
-            Sentry.captureException(error)
-            throw new Error('Internal Server Error')
-        }
+            )
+            returning *`
+        return u
     }
 
-    // deno-lint-ignore require-await
-    async create(register_id: number, username: string): Promise<tUser> {
+    /**
+     * @param register_id
+     * @param username
+     * @returns
+     * @throws {Error} Invalid register id
+     * @throws {Error} Username already registered
+     */
+    create(register_id: number, username: string): Promise<tUser> {
         const [reg] = db.sql<tRegister>`
-        select *
-        from registers
-        where id = ${register_id}`
+            select *
+            from registers
+            where id = ${register_id}`
         if (!reg) throw new Error('Invalid register id')
         const [u] = db.sql<tUser>`
-        select *
-        from users
-        where username = ${username}`
+            select *
+            from users
+            where username = ${username}`
         if (u) throw new Error('Username already registered')
-        try {
-            db.sql`
+        const [user] = db.sql<tUser>`
             insert into users (
                 username
             )
             values (
                 ${username}
-            )`
-            const [user] = db.sql<tUser>`
-            select *
-            from users
-            where username = ${username}`
-            if (!user) throw new Error('Internal Server Error')
-            db.sql`
+            ) returning *`
+        db.sql`
             update registers
             set user_id = ${user.id}
             where id = ${register_id}`
-            return user
-        } catch (error) {
-            console.error(error)
-            Sentry.captureException(error)
-            throw new Error('Internal Server Error')
-        }
+        return Promise.resolve(user)
     }
 
-    getRegister(
-        id: number,
-    ): Promise<{ created_at: string; email: string; id: number; password: string; user_id: number | null }> {
-        throw new Error('Method not implemented.')
+    /**
+     * @param id
+     * @returns
+     * @throws {Error} Register not found
+     */
+    getRegister(id: number): Promise<tRegister> {
+        const r = db.sql<tRegister>`
+            select *
+            from registers
+            where id = ${id}`
+        if (!r.length) throw new Error('Register not found')
+        const [reg] = r
+        return Promise.resolve(reg)
     }
 
+    /**
+     * @param param0
+     * @returns
+     * @throws {Error} Username already registered
+     */
     update(
-        options: { username?: string | undefined; displayname?: string | undefined },
-    ): Promise<{ avatar: string | null; displayname: string | null; id: number; username: string }> {
-        throw new Error('Method not implemented.')
+        { username, displayname, id }: { username?: string | undefined; displayname?: string | null; id: number },
+    ): Promise<tUser> {
+        if (username) {
+            const [u] = db.sql<tUser>`
+                select *
+                from users
+                where username = ${username}`
+            if (u) throw new Error('Username already registered')
+            db.sql`
+                update users
+                set username = ${username}
+                where id = ${id}`
+        }
+        if (typeof displayname !== 'undefined') {
+            db.sql`
+                update users
+                set displayname = ${displayname}
+                where id = ${id}`
+        }
+        const [user] = db.sql<tUser>`
+            select *
+            from users
+            where id = ${id}`
+        return Promise.resolve(user)
     }
 
-    setAvatar(id: number, avatar: File): Promise<tUser> {
-        throw new Error('Method not implemented.')
+    /**
+     * @param id
+     * @param avatar
+     * @returns
+     * @throws {Error} User not found
+     */
+    async setAvatar(id: number, avatar: File): Promise<tUser> {
+        const old = await this.get(id)
+        await Deno.mkdir(Deno.cwd() + `/sql/storage/avatars/olds`, { recursive: true }).catch(() => {})
+        if (old.avatar) {
+            await Deno.rename(
+                Deno.cwd() + `/sql/storage/avatars/${old.avatar}`,
+                Deno.cwd() + `/sql/storage/avatars/olds/${old.avatar}`,
+            )
+        }
+        const now = Date.now()
+        await Deno.writeFile(Deno.cwd() + `/sql/storage/avatars/${id}-${now}.png`, avatar.stream())
+        const [user] = db.sql<tUser>`
+            update users
+            set avatar = ${id + '-' + now + '.png'}
+            where id = ${id}
+            returning *`
+        return user
     }
 }

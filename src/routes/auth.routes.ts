@@ -30,7 +30,7 @@ export default new Hono()
             }
         },
     )
-    .post('/refresh', async (ctx) => {
+    .get('/refresh', async (ctx) => {
         const authorization = ctx.req.header('Authorization')
         if (!authorization) {
             return ctx.json({ message: 'Unauthorized' }, 401)

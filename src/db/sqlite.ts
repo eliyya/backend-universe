@@ -1,4 +1,4 @@
-import { Database, RestBindParameters } from '@sqlite/mod.ts'
+import { Database } from '@sqlite/mod.ts'
 
 const db = new Database('sql/database.db')
 
@@ -12,9 +12,11 @@ CREATE TABLE IF NOT EXISTS registers (
     user_id INTEGER NULL,
     UNIQUE(email),
     UNIQUE(user_id),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
+`
 
+db.sql`
 -- Tabla 'users'
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -23,7 +25,9 @@ CREATE TABLE IF NOT EXISTS users (
     avatar TEXT NULL,
     UNIQUE(username)
 );
+`
 
+db.sql`
 -- Tabla 'classes'
 CREATE TABLE IF NOT EXISTS classes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -35,7 +39,9 @@ CREATE TABLE IF NOT EXISTS classes (
     description TEXT NULL,
     FOREIGN KEY (teacher_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
+`
 
+db.sql`
 -- Tabla 'class_members'
 CREATE TABLE IF NOT EXISTS class_members (
     class_id INTEGER NOT NULL,
@@ -43,7 +49,9 @@ CREATE TABLE IF NOT EXISTS class_members (
     FOREIGN KEY (class_id) REFERENCES classes(id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
+`
 
+db.sql`
 -- Tabla 'class_groups'
 CREATE TABLE IF NOT EXISTS class_groups (
     class_id INTEGER NOT NULL,
@@ -52,28 +60,5 @@ CREATE TABLE IF NOT EXISTS class_groups (
     FOREIGN KEY (group_id) REFERENCES groups(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 `
-
-export const sql = {
-    db,
-    get<T extends Record<string, unknown>>(
-        strings: TemplateStringsArray,
-        ...values: RestBindParameters
-    ) {
-        return db.prepare(strings.join('?')).get<T>(...values)
-    },
-    exec(strings: TemplateStringsArray, ...values: RestBindParameters) {
-        return db.exec(strings.join('?'), ...values)
-    },
-    run(strings: TemplateStringsArray, ...values: RestBindParameters) {
-        return db.prepare(strings.join('?')).run(...values)
-    },
-    // deno-lint-ignore no-explicit-any
-    values<T extends unknown[] = any[]>(
-        strings: TemplateStringsArray,
-        ...values: RestBindParameters
-    ) {
-        return db.prepare(strings.join('?')).values<T>(...values)
-    },
-}
 
 export default db

@@ -21,6 +21,7 @@ export class UserModel implements iUserModel {
 
     /**
      * @throws {Error} Email already registered
+     * @throws {Error} Invalid email
      */
     async register(email: string, password: string): Promise<tRegister> {
         const parsedEmail = z.string().email().safeParse(email)
@@ -86,6 +87,13 @@ export class UserModel implements iUserModel {
         })
     }
 
+    /**
+     * @param register_id
+     * @param username
+     * @returns
+     * @throws {Error} Invalid register id
+     * @throws {Error} Username already registered
+     */
     async create(register_id: number, username: string): Promise<tUser> {
         const req = await supabase
             .from('registers')

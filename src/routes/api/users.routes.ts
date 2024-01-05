@@ -1,11 +1,11 @@
 import { Hono } from '@hono/mod.ts'
-import { Sentry } from '@error'
 import { User } from '@classes/User.ts'
 import { decodeToken } from '@utils/token.ts'
 import { tUserToken } from '@interfaces/User.ts'
 import { TOKEN_TYPES, tTokenType } from '@constants'
 import { zJSONValidator } from '@middlewares/validators.ts'
 import z from '@zod/index.ts'
+import meApi from './users/@me.routes.ts'
 
 const usersApi = new Hono()
 usersApi.post(
@@ -20,31 +20,30 @@ usersApi.post(
         return ctx.json(x)
     },
 )
-    .post(
-        '/create',
-        zJSONValidator(z.object({
-            username: z.string(),
-        })),
-        async (ctx) => {
-            const authorization = ctx.req.header('Authorization')
-            if (!authorization) {
-                return ctx.json({ message: 'Unauthorized' }, 401)
-            }
-            const [type, token] = authorization.split(' ') as [tTokenType, string]
-            if (type !== TOKEN_TYPES.Register) {
-                return ctx.json({ message: 'Unauthorized' }, 401)
-            }
-            const { expires, id } = await decodeToken<tUserToken>(token)
-            if (expires < Date.now()) {
-                return ctx.json({ message: 'Unauthorized' }, 401)
-            }
-            const { username } = ctx.var.body
-            const x = await User.create(+id, username)
-            return ctx.json(x)
-        },
-    )
+usersApi.post(
+    '/create',
+    zJSONValidator(z.object({
+        username: z.string(),
+    })),
+    async (ctx) => {
+        const authorization = ctx.req.header('Authorization')
+        if (!authorization) {
+            return ctx.json({ message: 'Unauthorized' }, 401)
+        }
+        const [type, token] = authorization.split(' ') as [tTokenType, string]
+        if (type !== TOKEN_TYPES.Register) {
+            return ctx.json({ message: 'Unauthorized' }, 401)
+        }
+        const { expires, id } = await decodeToken<tUserToken>(token)
+        if (expires < Date.now()) {
+            return ctx.json({ message: 'Unauthorized' }, 401)
+        }
+        const { username } = ctx.var.body
+        const x = await User.create(+id, username)
+        return ctx.json(x)
+    },
+)
 
-import me from './users/@me.ts'
-usersApi.route('/@me', me)
+usersApi.route('/@me', meApi)
 
 export default usersApi
