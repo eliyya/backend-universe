@@ -16,14 +16,16 @@ app.onError((error, ctx) => {
     return ctx.json({ message: 'Internal server error' }, 500)
 })
 
+console.log(import.meta.resolve('./'))
+console.log(import.meta.resolve('./routes'))
 async function getRoutes(
-    path = Deno.cwd() + Deno.env.get('NODE_ENV') === 'production' ? '' : '/src' + '/routes',
+    path = import.meta.resolve('./routes'),
     url = '/',
 ) {
     // declare routes object to return
     const routes: Record<string, Hono> = {}
     // if is file, import and add to routes
-    for await (const route of Deno.readDir(path)) {
+    for await (const route of Deno.readDir(path.replace(/file:\/\//, ''))) {
         if (route.isFile && route.name.includes('.routes.')) {
             const [routeName] = route.name.split('.')
             const { default: router } = await import(`${path}/${route.name}`)
@@ -39,7 +41,6 @@ async function getRoutes(
     // return routes object
     return routes
 }
-console.log(Deno.cwd())
 
 for (const [url, router] of Object.entries(await getRoutes())) {
     app.route(url, router)
