@@ -96,17 +96,23 @@ import db from '@db/sqlite.ts'
 //     select *
 //     from group_members`
 
-const user_id = 1
+// const user_id = 1
 
-const [m] = db.sql<{ group_ids: number }>`
-    select json_group_array(id) as group_ids
-    from groups
-    where owner_id = ${user_id}`
+// const [m] = db.sql<{ group_ids: number }>`
+//     select json_group_array(id) as group_ids
+//     from groups
+//     where owner_id = ${user_id}`
 
-console.log(user_id, m)
+// console.log(user_id, m)
 
-const [o] = db.sql<{ group_ids: number[] }>`
-    select json_group_array(group_members.group_id) as group_ids
-    from group_members
-    where user_id = ${user_id}`
-console.log(o.group_ids)
+// const [o] = db.sql<{ group_ids: number[] }>`
+//     select json_group_array(group_members.group_id) as group_ids
+//     from group_members
+//     where user_id = ${user_id}`
+// console.log(o.group_ids)
+
+const g = db.sql`
+    select *
+    from groups`
+
+console.log(g)

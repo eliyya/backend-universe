@@ -56,6 +56,7 @@ export interface Database {
       groups: {
         Row: {
           created_at: string
+          description: string | null
           id: number
           member_ids: number[]
           name: string
@@ -63,6 +64,7 @@ export interface Database {
         }
         Insert: {
           created_at?: string
+          description?: string | null
           id?: number
           member_ids: number[]
           name: string
@@ -70,6 +72,7 @@ export interface Database {
         }
         Update: {
           created_at?: string
+          description?: string | null
           id?: number
           member_ids?: number[]
           name?: string
