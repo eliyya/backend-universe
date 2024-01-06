@@ -16,7 +16,10 @@ app.onError((error, ctx) => {
     return ctx.json({ message: 'Internal server error' }, 500)
 })
 
-async function getRoutes(path = Deno.cwd() + '/src/routes', url = '/') {
+async function getRoutes(
+    path = Deno.cwd() + Deno.env.get('NODE_ENV') === 'production' ? '' : '/src' + '/routes',
+    url = '/',
+) {
     // declare routes object to return
     const routes: Record<string, Hono> = {}
     // if is file, import and add to routes
