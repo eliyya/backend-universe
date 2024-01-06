@@ -1,5 +1,4 @@
 import '@dotenv/load.ts'
-import '@error'
 import { Hono } from '@hono/mod.ts'
 import { cors, logger } from '@hono/middleware.ts'
 import { Sentry } from '@error'
@@ -16,43 +15,15 @@ app.onError((error, ctx) => {
     return ctx.json({ message: 'Internal server error' }, 500)
 })
 
-// for await (const route of Deno.readDir('./src/routes')) {
-//     console.log(route)
-// }
-
-// console.log(import.meta.resolve('./'))
-// console.log(import.meta.resolve('./routes'))
-async function getRoutes(
-    path = import.meta.resolve('./routes'),
-    url = '/',
-) {
-    // declare routes object to return
-    const routes: Record<string, Hono> = {}
-    // if is file, import and add to routes
-    for await (const route of Deno.readDir(path.replace(/file:\/\//, ''))) {
-        console.log('see', route)
-
-        if (route.isFile && route.name.includes('.routes.')) {
-            const [routeName] = route.name.split('.')
-            const { default: router } = await import(`${path}/${route.name.replace(/\.ts$/, '.js')}`)
-            // add route to routes object
-            routes[url + routeName] = router
-        } else if (route.isDirectory) { // if is directory, recursively get routes
-            const routeName = route.name.replace(/\.routes\..*$/, '')
-            console.log('try', `${path}/${route.name}`)
-
-            const subRoutes = await getRoutes(`${path}/${route.name}`, `${url}${routeName}/`)
-            // add subroutes to routes object
-            Object.assign(routes, subRoutes)
-        }
-    }
-    // return routes object
-    return routes
-}
-
-for (const [url, router] of Object.entries(await getRoutes())) {
-    app.route(url, router)
-    console.log(`Route ${url} loaded`)
-}
+import authApi from './routes/auth.routes.ts'
+app.route('/auth', authApi)
+import avatarApi from './routes/img/avatars.routes.ts'
+app.route('/img/avatars', avatarApi)
+import usersApi from './routes/api/users.routes.ts'
+app.route('/api/users', usersApi)
+import groupsApi from './routes/api/groups.routes.ts'
+app.route('/api/groups', groupsApi)
+import meApi from './routes/api/users/@me.routes.ts'
+app.route('/api/users/@me', meApi)
 
 Deno.serve(app.fetch)
