@@ -16,7 +16,7 @@ app.onError((error, ctx) => {
     return ctx.json({ message: 'Internal server error' }, 500)
 })
 
-for await (const route of Deno.readDir('./')) {
+for await (const route of Deno.readDir('./src')) {
     console.log(route)
 }
 
