@@ -1,7 +1,7 @@
 {
   "tasks": {
-    "start": "deno run --allow-net --allow-env --allow-sys --allow-read --allow-ffi --allow-write --unstable src/index.ts",
-    "dev": "deno run --allow-net --allow-env --allow-sys --allow-read --allow-ffi --allow-write --unstable --watch src/index.ts"
+    "start": "./build_routes.sh && deno run --allow-net --allow-env --allow-sys --allow-read --allow-ffi --allow-write --unstable src/index.ts",
+    "dev": "./build_routes.sh && deno run --allow-net --allow-env --allow-sys --allow-read --allow-ffi --allow-write --unstable --watch src/index.ts"
   },
   "fmt": {
     "singleQuote": true,
