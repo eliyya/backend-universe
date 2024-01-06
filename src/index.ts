@@ -16,11 +16,27 @@ app.onError((error, ctx) => {
     return ctx.json({ message: 'Internal server error' }, 500)
 })
 
-import auth from './routes/auth.routes.ts'
-app.route('/auth', auth)
-import api from './routes/api.routes.ts'
-app.route('/api', api)
-import img from './routes/img.routes.ts'
-app.route('/img', img)
+async function getRoutes(path = Deno.cwd() + '/src/routes', url = '/') {
+    // declare routes object to return
+    const routes: Record<string, Hono> = {}
+    // if is file, import and add to routes
+    for await (const route of Deno.readDir(path)) {
+        if (route.isFile && route.name.includes('.routes.')) {
+            const [routeName] = route.name.split('.')
+            const { default: router } = await import(`${path}/${route.name}`)
+            // add route to routes object
+            routes[url + routeName] = router
+        } else if (route.isDirectory) { // if is directory, recursively get routes
+            const routeName = route.name.replace(/\.routes\..*$/, '')
+            const subRoutes = await getRoutes(`${path}/${route.name}`, `${url}${routeName}/`)
+            // add subroutes to routes object
+            Object.assign(routes, subRoutes)
+        }
+    }
+    // return routes object
+    return routes
+}
+
+Object.entries(await getRoutes()).forEach((p) => app.route(...p))
 
 Deno.serve(app.fetch)

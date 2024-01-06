@@ -5,7 +5,7 @@ import { iUserModel, tRegister, tUser } from '@interfaces/User.ts'
 import { generateToken } from '@utils/token.ts'
 import { TOKEN_TYPES, tTokenType } from '@constants'
 
-export class User implements iUserModel {
+export class UserModel implements iUserModel {
     /**
      * @throws {Error} Not found
      */

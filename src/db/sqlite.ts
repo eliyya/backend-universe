@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS registers (
     user_id INTEGER NULL,
     UNIQUE(email),
     UNIQUE(user_id),
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 `
 
@@ -58,6 +58,28 @@ CREATE TABLE IF NOT EXISTS class_groups (
     group_id INTEGER NOT NULL,
     FOREIGN KEY (class_id) REFERENCES classes(id) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (group_id) REFERENCES groups(id) ON UPDATE CASCADE ON DELETE CASCADE
+);
+`
+
+db.sql`
+-- Tabla 'groups'
+CREATE TABLE IF NOT EXISTS groups (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    owner_id INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    icon TEXT NULL,
+    description TEXT NULL,
+    FOREIGN KEY (owner_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE
+);`
+
+db.sql`
+-- Tabla 'group_members'
+CREATE TABLE IF NOT EXISTS group_members (
+    group_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    FOREIGN KEY (group_id) REFERENCES groups(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 `
 

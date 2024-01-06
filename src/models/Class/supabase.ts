@@ -2,7 +2,7 @@ import { iClass, tClass } from '@interfaces/Class.ts'
 import supabase from '@db/supabase.ts'
 import { Sentry } from '@error'
 
-export class Class implements iClass {
+export class ClassModel implements iClass {
     async create(
         options:
             & Omit<Partial<tClass>, 'id' | 'created_at'>

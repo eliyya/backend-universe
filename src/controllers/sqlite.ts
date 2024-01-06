@@ -1,6 +1,8 @@
-import { User } from '@models/User/sqlite.ts'
-import { Class } from '@models/Class/sqlite.ts'
+import { UserModel } from '@models/User/sqlite.ts'
+import { ClassModel } from '@models/Class/sqlite.ts'
 import { ImgsModel } from '@models/Imgs/sqlite.ts'
-export const userController = new User()
-export const classController = new Class()
+import { GroupModel } from '@models/Group/sqlite.ts'
+export const userController = new UserModel()
+export const classController = new ClassModel()
 export const imgsController = new ImgsModel()
+export const groupController = new GroupModel()

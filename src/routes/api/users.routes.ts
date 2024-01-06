@@ -5,7 +5,6 @@ import { tUserToken } from '@interfaces/User.ts'
 import { TOKEN_TYPES, tTokenType } from '@constants'
 import { zJSONValidator } from '@middlewares/validators.ts'
 import z from '@zod/index.ts'
-import meApi from './users/@me.routes.ts'
 
 const usersApi = new Hono()
 usersApi.post(
@@ -44,6 +43,6 @@ usersApi.post(
     },
 )
 
-usersApi.route('/@me', meApi)
+// usersApi.route('/@me', meApi)
 
 export default usersApi
