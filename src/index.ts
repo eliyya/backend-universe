@@ -30,6 +30,8 @@ async function getRoutes(
     const routes: Record<string, Hono> = {}
     // if is file, import and add to routes
     for await (const route of Deno.readDir(path.replace(/file:\/\//, ''))) {
+        console.log('see', route)
+
         if (route.isFile && route.name.includes('.routes.')) {
             const [routeName] = route.name.split('.')
             const { default: router } = await import(`${path}/${route.name}`)
@@ -37,6 +39,8 @@ async function getRoutes(
             routes[url + routeName] = router
         } else if (route.isDirectory) { // if is directory, recursively get routes
             const routeName = route.name.replace(/\.routes\..*$/, '')
+            console.log('try', `${path}/${route.name}`)
+
             const subRoutes = await getRoutes(`${path}/${route.name}`, `${url}${routeName}/`)
             // add subroutes to routes object
             Object.assign(routes, subRoutes)
