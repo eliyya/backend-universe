@@ -6,6 +6,7 @@ import { Sentry } from '@error'
 
 const userApi = new Hono()
 userApi.get('/', auth, (ctx) => ctx.json(ctx.var.user))
+
 userApi.patch(
     '/',
     auth,

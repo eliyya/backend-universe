@@ -1,7 +1,7 @@
 import db from '@db/sqlite.ts'
-import { hash } from '@utils/hash.ts'
+// import { hash } from '@utils/hash.ts'
 
-// const v = db.sql`
+// const f = db.sql`
 //     insert into groups (
 //         name,
 //         description,
@@ -12,6 +12,7 @@ import { hash } from '@utils/hash.ts'
 //         'test description',
 //         1
 //     ) returning *`
+// console.log(f)
 
 // const v = db.sql`
 //     insert into registers (
@@ -37,15 +38,17 @@ import { hash } from '@utils/hash.ts'
 //     WHERE id = 2
 //     RETURNING *`
 
-// const v = db.sql`
+// const i = db.sql`
 //     insert into group_members (
 //         group_id,
 //         user_id
 //         )
 //     values (
-//         1,
+//         2,
 //         3
 //     ) returning *`
+
+// console.log(i)
 
 // const v = db.sql`
 //     insert into users (
@@ -89,8 +92,21 @@ import { hash } from '@utils/hash.ts'
 //     select *
 //     from users`
 
-const m = db.sql`
-    select *
-    from group_members`
+// const m = db.sql`
+//     select *
+//     from group_members`
 
-console.log(m)
+const user_id = 2
+
+const m = db.sql`
+    select 
+        groups.*, 
+        json_group_array(group_members.user_id) 
+            as member_ids
+    from groups
+    left join group_members
+    on groups.id = group_members.group_id
+    where group_members.user_id = ${user_id}
+    or groups.owner_id = ${user_id}`
+
+console.log(user_id, m)

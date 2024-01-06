@@ -37,6 +37,9 @@ async function getRoutes(path = Deno.cwd() + '/src/routes', url = '/') {
     return routes
 }
 
-Object.entries(await getRoutes()).forEach((p) => app.route(...p))
+for (const [url, router] of Object.entries(await getRoutes())) {
+    app.route(url, router)
+    console.log(`Route ${url} loaded`)
+}
 
 Deno.serve(app.fetch)

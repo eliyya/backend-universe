@@ -74,4 +74,17 @@ export class GroupModel implements iGroupModel {
             and user_id = ${options.user_id}`
         return this.get(options.id)
     }
+
+    getAllOfUser(user_id: number): Promise<tGroup[]> {
+        const groups = db.sql<tGroup>`
+            select 
+                groups.*, 
+                json_group_array(group_members.user_id) 
+                    as member_ids
+            from groups
+            left join group_members
+            on groups.id = group_members.group_id
+            where group_members.user_id = ${user_id}`
+        return Promise.resolve(groups)
+    }
 }

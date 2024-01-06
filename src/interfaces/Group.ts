@@ -9,4 +9,5 @@ export interface iGroupModel {
     delete(id: number): Promise<void>
     addMember(options: { id: number; user_id: number }): Promise<tGroup>
     removeMember(options: { id: number; user_id: number }): Promise<tGroup>
+    getAllOfUser(user_id: number): Promise<tGroup[]>
 }

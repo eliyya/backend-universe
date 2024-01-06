@@ -43,6 +43,10 @@ usersApi.post(
     },
 )
 
-// usersApi.route('/@me', meApi)
+usersApi.get('/:id', async (ctx) => {
+    const id = ctx.req.param('id')
+    const x = await User.get(+id)
+    return ctx.json(x)
+})
 
 export default usersApi
