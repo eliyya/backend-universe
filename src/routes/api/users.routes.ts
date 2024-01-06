@@ -43,8 +43,12 @@ usersApi.post(
     },
 )
 
-usersApi.get('/:id', async (ctx) => {
+// not @me
+usersApi.get('/:id', async (ctx, next) => {
     const id = ctx.req.param('id')
+    if (id === '@me') {
+        return await next()
+    }
     const x = await User.get(+id)
     return ctx.json(x)
 })

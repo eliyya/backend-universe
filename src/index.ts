@@ -32,5 +32,5 @@ app.route('/api/groups', groupsApi)
 import avatarsApi from './routes/img/avatars.routes.ts'
 app.route('/img/avatars', avatarsApi)
 
-
+// IMPORTANT: DON'T TOUCH THIS LINES
 Deno.serve(app.fetch)

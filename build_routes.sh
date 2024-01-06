@@ -8,12 +8,12 @@ index_file="src/index.ts"
 
 # Verificar si el archivo index.ts existe
 if [ -f "$index_file" ]; then
-    # Obtener la línea después del comentario "// important"
+    # Obtener la línea después del comentario "// IMPORTANT: DON'T TOUCH THIS LINES"
     line_number=$(grep -n "// IMPORTANT: DON'T TOUCH THIS LINES" $index_file | cut -d ":" -f 1)
     
     # Verificar si se encontró la línea del comentario
     if [ -n "$line_number" ]; then
-        # Eliminar todo el contenido debajo del comentario "// important"
+        # Eliminar todo el contenido debajo del comentario "// IMPORTANT: DON'T TOUCH THIS LINES"
         sed -i "${line_number}q" $index_file
 
         # Crear un nuevo contenido para el archivo index.ts
@@ -21,7 +21,6 @@ if [ -f "$index_file" ]; then
 
         # Iterar sobre los archivos y agregar las importaciones y rutas
         for file in $files; do
-            # echo "Procesando el archivo ${file#src/routes/}..."
             # Obtener el nombre del archivo sin la extensión
             file_name=$(basename -- "$file")
             file_name="${file_name%.*}"
@@ -44,17 +43,18 @@ if [ -f "$index_file" ]; then
             new_content="${new_content}\n${import_line}\n${route_line}\n"
         done
 
-        new_content="${new_content}\n\nDeno.serve(app.fetch)"
+        new_content="${new_content}\n\n// IMPORTANT: DON'T TOUCH THIS LINES\nDeno.serve(app.fetch)"
 
         # Actualizar el archivo index.ts con las nuevas importaciones y rutas
         sed -i "${line_number}a\\$new_content" $index_file
 
         echo "El archivo index.ts ha sido actualizado con las importaciones y rutas."
     else
-        echo "No se encontró el comentario '// important' en el archivo index.ts."
+        echo "No se encontró el comentario '// IMPORTANT: DON'T TOUCH THIS LINES' en el archivo index.ts."
     fi
 else
     echo "El archivo index.ts no existe en el directorio actual."
 fi
 
 # Fin del script
+
