@@ -76,15 +76,19 @@ export class GroupModel implements iGroupModel {
     }
 
     getAllOfUser(user_id: number): Promise<tGroup[]> {
-        const groups = db.sql<tGroup>`
-            select 
-                groups.*, 
-                json_group_array(group_members.user_id) 
-                    as member_ids
+        const [m] = db.sql<{ group_ids: number[] }>`
+            select json_group_array(id) as group_ids
             from groups
-            left join group_members
-            on groups.id = group_members.group_id
-            where group_members.user_id = ${user_id}`
-        return Promise.resolve(groups)
+            where owner_id = ${user_id}`
+
+        console.log(user_id, m)
+
+        const [o] = db.sql<{ group_ids: number[] }>`
+            select json_group_array(group_members.group_id) as group_ids
+            from group_members
+            where user_id = ${user_id}`
+        const group_ids = new Set([...m.group_ids, ...o.group_ids])
+        const groups = [...group_ids].map((id) => this.get(id))
+        return Promise.all(groups)
     }
 }

@@ -96,17 +96,17 @@ import db from '@db/sqlite.ts'
 //     select *
 //     from group_members`
 
-const user_id = 2
+const user_id = 1
 
-const m = db.sql`
-    select 
-        groups.*, 
-        json_group_array(group_members.user_id) 
-            as member_ids
+const [m] = db.sql<{ group_ids: number }>`
+    select json_group_array(id) as group_ids
     from groups
-    left join group_members
-    on groups.id = group_members.group_id
-    where group_members.user_id = ${user_id}
-    or groups.owner_id = ${user_id}`
+    where owner_id = ${user_id}`
 
 console.log(user_id, m)
+
+const [o] = db.sql<{ group_ids: number[] }>`
+    select json_group_array(group_members.group_id) as group_ids
+    from group_members
+    where user_id = ${user_id}`
+console.log(o.group_ids)
