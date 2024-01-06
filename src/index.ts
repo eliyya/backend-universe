@@ -16,7 +16,9 @@ app.onError((error, ctx) => {
     return ctx.json({ message: 'Internal server error' }, 500)
 })
 
-console.log(await Deno.readDir('./'))
+for await (const route of Deno.readDir('./')) {
+    console.log(route)
+}
 
 console.log(import.meta.resolve('./'))
 console.log(import.meta.resolve('./routes'))
