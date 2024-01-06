@@ -16,12 +16,12 @@ app.onError((error, ctx) => {
     return ctx.json({ message: 'Internal server error' }, 500)
 })
 
-for await (const route of Deno.readDir('./src/routes')) {
-    console.log(route)
-}
+// for await (const route of Deno.readDir('./src/routes')) {
+//     console.log(route)
+// }
 
-console.log(import.meta.resolve('./'))
-console.log(import.meta.resolve('./routes'))
+// console.log(import.meta.resolve('./'))
+// console.log(import.meta.resolve('./routes'))
 async function getRoutes(
     path = import.meta.resolve('./routes'),
     url = '/',
@@ -34,7 +34,7 @@ async function getRoutes(
 
         if (route.isFile && route.name.includes('.routes.')) {
             const [routeName] = route.name.split('.')
-            const { default: router } = await import(`${path}/${route.name}`)
+            const { default: router } = await import(`${path}/${route.name.replace(/\.ts$/, '.js')}`)
             // add route to routes object
             routes[url + routeName] = router
         } else if (route.isDirectory) { // if is directory, recursively get routes
