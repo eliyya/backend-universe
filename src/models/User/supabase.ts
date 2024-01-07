@@ -1,12 +1,13 @@
 import { z } from '@zod/mod.ts'
 import { compare, hash } from '@utils/hash.ts'
 import supabase from '@db/supabase.ts'
-import { iUserModel, tRegister, tUser } from '@interfaces/User.ts'
+import { iUserModel } from '@interfaces/User.ts'
 import { generateToken } from '@utils/token.ts'
 import { TOKEN_TYPES, tTokenType } from '@constants'
+import { ApiRegister, ApiUser } from '@apiTypes'
 
 export class UserModel implements iUserModel {
-    async get(id: number): Promise<tUser> {
+    async get(id: number): Promise<ApiUser> {
         const req = await supabase
             .from('users')
             .select()
@@ -23,7 +24,7 @@ export class UserModel implements iUserModel {
      * @throws {Error} Email already registered
      * @throws {Error} Invalid email
      */
-    async register(email: string, password: string): Promise<tRegister> {
+    async register(email: string, password: string): Promise<ApiRegister> {
         const parsedEmail = z.string().email().safeParse(email)
         if (!parsedEmail.success) throw new Error('Invalid email')
         const req = await supabase
@@ -43,7 +44,10 @@ export class UserModel implements iUserModel {
             console.error(r.error)
             throw new Error(r.error.message)
         }
-        return r.data[0]
+        return {
+            ...r.data[0],
+            created_at: new Date(r.data[0].created_at).getTime(),
+        }
     }
 
     /**
@@ -94,7 +98,7 @@ export class UserModel implements iUserModel {
      * @throws {Error} Invalid register id
      * @throws {Error} Username already registered
      */
-    async create(register_id: number, username: string): Promise<tUser> {
+    async create(register_id: number, username: string): Promise<ApiUser> {
         const req = await supabase
             .from('registers')
             .select()
@@ -137,7 +141,7 @@ export class UserModel implements iUserModel {
     /**
      * @throws {Error} Register not found
      */
-    async getRegister(id: number): Promise<tRegister> {
+    async getRegister(id: number): Promise<ApiRegister & { password: string }> {
         const r = await supabase
             .from('registers')
             .select()
@@ -148,7 +152,10 @@ export class UserModel implements iUserModel {
         }
         if (!r.data?.length) throw new Error('Register not found')
         const [reg] = r.data
-        return reg
+        return {
+            ...reg,
+            created_at: new Date(reg.created_at).getTime(),
+        }
     }
 
     /**
@@ -156,7 +163,7 @@ export class UserModel implements iUserModel {
      */
     async update(
         { id, displayname, username }: { username?: string; displayname?: string | null; id: number },
-    ): Promise<tUser> {
+    ): Promise<ApiUser> {
         const u = await supabase
             .from('users')
             .update({ displayname, username })
@@ -172,7 +179,7 @@ export class UserModel implements iUserModel {
         return user
     }
 
-    async setAvatar(id: number, avatar: File): Promise<tUser> {
+    async setAvatar(id: number, avatar: File): Promise<ApiUser> {
         const o = await supabase
             .from('users')
             .select()

@@ -16,6 +16,7 @@
     "@encoding/": "https://deno.land/std@0.133.0/encoding/",
     "@supabase": "https://esm.sh/@supabase/supabase-js@2.39.1",
     "@sqlite/": "https://deno.land/x/sqlite3@0.10.0/",
+    "@apiTypes": "https://deno.land/x/funi_types@v0.1.3/mod.ts",
     "@sentry": "npm:@sentry/node",
     "@controller": "./src/controllers/default.ts",
     "@error": "./src/sentry.ts",

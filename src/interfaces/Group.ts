@@ -1,13 +1,10 @@
-import { Database } from '../database.types.ts'
-
-export type tGroup = Database['public']['Tables']['groups']['Row']
-
+import { ApiGroup } from '@apiTypes'
 export interface iGroupModel {
-    get(id: number): Promise<tGroup>
-    create(options: { name: string; description?: string; owner_id: number }): Promise<tGroup>
-    update(options: { id: number; name?: string; description?: string | null }): Promise<tGroup>
+    get(id: number): Promise<ApiGroup>
+    create(options: { name: string; description?: string; owner_id: number }): Promise<ApiGroup>
+    update(options: { id: number; name?: string; description?: string | null }): Promise<ApiGroup>
     delete(id: number): Promise<void>
-    addMember(options: { id: number; user_id: number }): Promise<tGroup>
-    removeMember(options: { id: number; user_id: number }): Promise<tGroup>
-    getAllOfUser(user_id: number): Promise<tGroup[]>
+    addMember(options: { id: number; user_id: number }): Promise<ApiGroup>
+    removeMember(options: { id: number; user_id: number }): Promise<ApiGroup>
+    getAllOfUser(user_id: number): Promise<ApiGroup[]>
 }

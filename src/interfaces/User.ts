@@ -1,25 +1,23 @@
 import { tTokenType } from '@constants'
-import { Database } from '../database.types.ts'
+import { ApiRegister, ApiUser } from '@apiTypes'
 
-export type tUser = Database['public']['Tables']['users']['Row']
-export type tRegister = Database['public']['Tables']['registers']['Row']
 export type tUserToken = {
     email: string
     id: string
     created_at: string
-    user?: tUser
+    user?: ApiUser
     type: tTokenType
 }
 
 export interface iUserModel {
-    get(id: number): Promise<tUser>
-    register(email: string, password: string): Promise<tRegister>
+    get(id: number): Promise<ApiUser>
+    register(email: string, password: string): Promise<ApiRegister>
     login(
         email: string,
         password: string,
     ): Promise<{ token: string; expires: number; type: tTokenType }>
-    create(register_id: number, username: string): Promise<tUser>
-    getRegister(id: number): Promise<tRegister>
-    update(options: { username?: string; displayname?: string | null }): Promise<tUser>
-    setAvatar(id: number, avatar: File): Promise<tUser>
+    create(register_id: number, username: string): Promise<ApiUser>
+    getRegister(id: number): Promise<ApiRegister & { password: string }>
+    update(options: { username?: string; displayname?: string | null }): Promise<ApiUser>
+    setAvatar(id: number, avatar: File): Promise<ApiUser>
 }
