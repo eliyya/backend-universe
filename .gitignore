@@ -1,3 +1,5 @@
 .env
 # Sentry Config File
 .sentryclirc
+node_modules
+package-lock.json

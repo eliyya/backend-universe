@@ -1,4 +1,4 @@
-import { Database } from '../database.types.ts'
+import { Database } from './supabase.types.ts'
 import { createClient } from '@supabase'
 import '@dotenv/load.ts'
 
