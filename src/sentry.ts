@@ -19,4 +19,9 @@ addEventListener('error', (ev) => {
     Sentry.captureException(ev)
 })
 
-export { Sentry }
+function captureException(error: any): void {
+    console.error(error)
+    Sentry.captureException(error)
+}
+
+export { captureException, Sentry }

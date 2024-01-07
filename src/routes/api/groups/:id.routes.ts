@@ -1,5 +1,5 @@
 import { Hono } from '@hono/mod.ts'
-import { Sentry } from '@error'
+import { captureException } from '@error'
 import { groupController, userController } from '@controller'
 import { auth } from '@middlewares/auth.ts'
 import { zJSONValidator } from '@middlewares/validators.ts'
@@ -13,8 +13,7 @@ idApi.get('/', auth, async (ctx) => {
         return ctx.json(group)
     } catch (error) {
         if (error.message === 'Group not found') return ctx.json({ error: error.message }, 404)
-        console.error(error)
-        Sentry.captureException(error)
+        captureException(error)
     }
 })
 
@@ -31,8 +30,7 @@ idApi.post(
         } catch (error) {
             if (error.message === 'Group not found') return ctx.json({ error: error.message }, 404)
             if (error.message.includes('User is already')) return ctx.json({ error: error.message }, 400)
-            console.error(error)
-            Sentry.captureException(error)
+            captureException(error)
             return ctx.json({ error: 'Internal server error' }, 500)
         }
     },
@@ -51,8 +49,7 @@ idApi.post(
         } catch (error) {
             if (error.message === 'Group not found') return ctx.json({ error: error.message }, 404)
             if (error.message.includes('User is already')) return ctx.json({ error: error.message }, 400)
-            console.error(error)
-            Sentry.captureException(error)
+            captureException(error)
             return ctx.json({ error: 'Internal server error' }, 500)
         }
     },
@@ -68,8 +65,7 @@ idApi.get('/members', auth, async (ctx) => {
         return ctx.json(members)
     } catch (error) {
         if (error.message === 'Group not found') return ctx.json({ error: error.message }, 404)
-        console.error(error)
-        Sentry.captureException(error)
+        captureException(error)
         return ctx.json({ error: 'Internal server error' }, 500)
     }
 })
@@ -88,8 +84,7 @@ idApi.delete('/members/:user_id', auth, async (ctx) => {
     } catch (error) {
         if (error.message === 'Group not found') return ctx.json({ error: error.message }, 404)
         if (error.message.includes('User is already')) return ctx.json({ error: error.message }, 400)
-        console.error(error)
-        Sentry.captureException(error)
+        captureException(error)
         return ctx.json({ error: 'Internal server error' }, 500)
     }
 })
@@ -104,8 +99,7 @@ idApi.delete('/', auth, async (ctx) => {
         return ctx.body(null, 204)
     } catch (error) {
         if (error.message === 'Group not found') return ctx.json({ error: error.message }, 404)
-        console.error(error)
-        Sentry.captureException(error)
+        captureException(error)
         return ctx.json({ error: 'Internal server error' }, 500)
     }
 })

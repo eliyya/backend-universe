@@ -2,7 +2,7 @@ import { Hono } from '@hono/mod.ts'
 import { userController } from '@controller'
 import { z } from '@zod/mod.ts'
 import { zJSONValidator } from '@middlewares/validators.ts'
-import { Sentry } from '@error'
+import { captureException } from '@error'
 import { TOKEN_TYPES, tTokenType } from '@constants'
 import { decodeToken, generateToken } from '@utils/token.ts'
 import { tUserToken } from '@interfaces/User.ts'
@@ -24,8 +24,7 @@ export default new Hono()
                 if (error instanceof Error && error.message === 'Invalid user or password') {
                     return ctx.json({ message: 'Invalid user or password' }, 401)
                 }
-                console.error(error)
-                Sentry.captureException(error)
+                captureException(error)
                 return ctx.json({ message: 'Internal server error' }, 500)
             }
         },

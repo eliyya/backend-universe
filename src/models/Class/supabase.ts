@@ -1,6 +1,6 @@
 import { iClass } from '@interfaces/Class.ts'
 import supabase from '@db/supabase.ts'
-import { Sentry } from '@error'
+import { captureException } from '@error'
 import { ApiClass } from '@apiTypes'
 
 export class ClassModel implements iClass {
@@ -19,8 +19,7 @@ export class ClassModel implements iClass {
             icon: options.icon ?? null,
         }).select()
         if (r.error) {
-            console.error(r.error)
-            Sentry.captureException(r.error)
+            captureException(r.error)
             throw new Error(JSON.stringify(r))
         }
         return {
@@ -36,8 +35,7 @@ export class ClassModel implements iClass {
     async get(id: number): Promise<ApiClass> {
         const r = await supabase.from('classes').select().match({ id })
         if (r.error) {
-            console.error(r.error)
-            Sentry.captureException(r.error)
+            captureException(r.error)
             throw new Error(JSON.stringify(r))
         }
         return {
@@ -62,8 +60,7 @@ export class ClassModel implements iClass {
             member_ids: options.member_ids,
         }).match({ id }).select()
         if (r.error) {
-            console.error(r.error)
-            Sentry.captureException(r.error)
+            captureException(r.error)
             throw new Error(JSON.stringify(r))
         }
         return {

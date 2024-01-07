@@ -1,7 +1,7 @@
 import { type MiddlewareHandler } from '@hono/mod.ts'
 import { type tUserToken } from '@interfaces/User.ts'
 import { decodeToken } from '@utils/token.ts'
-import { Sentry } from '@error'
+import { captureException } from '@error'
 import { User } from '@classes/User.ts'
 import { TOKEN_TYPES, tTokenType } from '@constants'
 
@@ -32,8 +32,7 @@ export const auth: MiddlewareHandler<{ Variables: { user: User } }> = async (
         if (error instanceof Error && error.message === 'Token expired') {
             return ctx.json({ message: 'Unauthorized' }, 401)
         }
-        console.error(error)
-        Sentry.captureException(error)
+        captureException(error)
         return ctx.json({ message: 'Internal Server Error' }, 500)
     }
 }

@@ -2,7 +2,7 @@ import { Hono } from '@hono/mod.ts'
 import { auth } from '@middlewares/auth.ts'
 import { zFormValidator, zJSONValidator } from '@middlewares/validators.ts'
 import z from '@zod/index.ts'
-import { Sentry } from '@error'
+import { captureException } from '@error'
 
 const userApi = new Hono()
 userApi.get('/', auth, (ctx) => ctx.json(ctx.var.user))
@@ -25,8 +25,7 @@ userApi.patch(
             if (error.message === 'Username already registered') {
                 return ctx.json({ message: error.message }, 409)
             }
-            Sentry.captureException(error)
-            console.error(error)
+            captureException(error)
             return ctx.json({ message: 'Internal Server Error' }, 500)
         }
     },

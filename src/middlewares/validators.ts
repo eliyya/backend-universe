@@ -1,6 +1,6 @@
 import { type MiddlewareHandler } from '@hono/mod.ts'
 import { z, type ZodObject, ZodType, type ZodTypeAny } from '@zod/mod.ts'
-import { Sentry } from '@error'
+import { captureException } from '@error'
 
 type zJSONValidatorFunction = <
     T extends { [k: string]: ZodTypeAny },
@@ -35,8 +35,7 @@ export const zJSONValidator: zJSONValidatorFunction = (schema) => async (ctx, ne
                 error: [{ message: 'Invalid JSON' }],
             }, 400)
         }
-        console.error(error)
-        Sentry.captureException(error)
+        captureException(error)
         return ctx.json({ message: 'Internal Server Error' }, 500)
     }
 }
@@ -67,8 +66,7 @@ export const zFormValidator: zFormValidatorFunction = (propertiesSchema) => asyn
         ctx.set('bodyForm', fd)
         return await next()
     } catch (error) {
-        console.error(error)
-        Sentry.captureException(error)
+        captureException(error)
         return ctx.json({ message: 'Internal Server Error' }, 500)
     }
 }
