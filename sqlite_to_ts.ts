@@ -1,3 +1,5 @@
+#!/usr/bin/env -S deno run --allow-read --allow-write --unstable --allow-env --allow-ffi
+
 import db from '@db/sqlite.ts'
 
 let output = ''

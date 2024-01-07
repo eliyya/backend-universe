@@ -1,8 +1,8 @@
 {
   "tasks": {
-    "sqlitetypes": "deno run --unstable --allow-env --allow-read --allow-ffi --allow-write sqlitetots.ts",
+    "sqlitetypes": "./sqlite_to_ts.ts",
     "supabasetypes": "supabase gen types typescript --project-id hfumkvdxfzkgmbkrfkoe > src/database.types.ts",
-    "importroutes": "./build_routes.sh",
+    "importroutes": "./build_routes.ts",
     "start": "deno task importroutes && deno run --allow-net --allow-env --allow-sys --allow-read --allow-ffi --allow-write --unstable src/index.ts",
     "dev": "deno task importroutes && deno run --allow-net --allow-env --allow-sys --allow-read --allow-ffi --allow-write --unstable --watch src/index.ts"
   },
