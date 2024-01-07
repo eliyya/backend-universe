@@ -63,8 +63,91 @@ export class GroupModel implements iGroupModel {
         return [...new Set([...ow.data, ...mem.data])]
     }
 
-    // async addMember(options: { id: number; user_id: number }): Promise<tGroup> {
-    //     const old = await this.get(options.id)
+    /**
+     * @param options
+     * @returns
+     * @throws {Error} User is already owner
+     * @throws {Error} Group not found
+     * @throws {Error} User is already member
+     */
+    async addMember(options: { id: number; user_id: number }): Promise<tGroup> {
+        const old = await this.get(options.id)
+        if (old.owner_id === options.user_id) throw new Error('User is already owner')
+        if (old.member_ids.includes(options.user_id)) throw new Error('User is already member')
+        const req = await supabase
+            .from('groups')
+            .update({
+                member_ids: [...old.member_ids, options.user_id],
+            })
+            .eq('id', options.id)
+            .select()
+        if (req.error) {
+            console.error(req.error)
+            throw req.error
+        }
+        const [g] = req.data
+        return g
+    }
 
-    // }
+    /**
+     * @param options
+     * @returns
+     * @throws {Error} User is already owner
+     * @throws {Error} Group not found
+     */
+    async removeMember(options: { id: number; user_id: number }): Promise<tGroup> {
+        const old = await this.get(options.id)
+        if (old.owner_id === options.user_id) throw new Error('User is already owner')
+        if (!old.member_ids.includes(options.user_id)) return old
+        const req = await supabase
+            .from('groups')
+            .update({
+                member_ids: old.member_ids.filter((id) => id !== options.user_id),
+            })
+            .eq('id', options.id)
+            .select()
+        if (req.error) {
+            console.error(req.error)
+            throw req.error
+        }
+        const [g] = req.data
+        return g
+    }
+
+    /**
+     * @param {number} id
+     * @returns
+     */
+    async delete(id: number): Promise<void> {
+        const req = await supabase
+            .from('groups')
+            .delete()
+            .eq('id', id)
+            .select()
+        if (req.error) {
+            console.error(req.error)
+            throw req.error
+        }
+    }
+
+    /**
+     * @param
+     * @returns
+     */
+    async update(options: { id: number; name?: string; description?: string | null }): Promise<tGroup> {
+        const req = await supabase
+            .from('groups')
+            .update({
+                name: options.name,
+                description: options.description,
+            })
+            .eq('id', options.id)
+            .select()
+        if (req.error) {
+            console.error(req.error)
+            throw req.error
+        }
+        const [g] = req.data
+        return g
+    }
 }
