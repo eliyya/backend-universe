@@ -30,5 +30,12 @@
     "@db/": "./src/db/",
     "@classes/": "./src/classes/",
     "@constants": "./src/constants.ts"
+  },
+  "lint": {
+    "rules": {
+      "tags": ["recommended"],
+      "include": ["eqeqeq", "no-sync-fn-in-async-fn", "no-throw-literal"],
+      "exclude": ["no-explicit-any"]
+    }
   }
 }

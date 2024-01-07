@@ -6,17 +6,18 @@ import { generateToken } from '@utils/token.ts'
 import { TOKEN_TYPES, TokenType } from '@constants'
 import { ApiRegister, ApiUser } from '@apiTypes'
 import { dbRegisters, dbUsers } from '@db/sqlite.types.ts'
+import { DataBaseError } from '@error'
 
 export class UserSqliteModel implements UserModel {
     /**
-     * @throws {Error} Not found
+     * @throws {DataBaseError} Not found
      */
     get(id: number): Promise<ApiUser> {
         const u = db.sql<dbUsers>`
             select * 
             from users 
             where id = ${id}`
-        if (!u.length) throw new Error('Not found')
+        if (!u.length) throw DataBaseError.NotFound('User')
         return Promise.resolve(u[0])
     }
 
