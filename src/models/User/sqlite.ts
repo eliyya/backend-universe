@@ -1,19 +1,20 @@
 import { z } from '@zod/mod.ts'
 import { compare, hash } from '@utils/hash.ts'
 import db from '@db/sqlite.ts'
-import { iUserModel, tRegister, tUser } from '@interfaces/User.ts'
+import { iUserModel } from '@interfaces/User.ts'
 import { generateToken } from '@utils/token.ts'
 import { TOKEN_TYPES, tTokenType } from '@constants'
+import { ApiRegister, ApiUser } from '@apiTypes'
 
 export class UserModel implements iUserModel {
     /**
      * @throws {Error} Not found
      */
-    get(id: number): Promise<tUser> {
-        const u = db.sql<tUser>`
-        select * 
-        from users 
-        where id = ${id}`
+    get(id: number): Promise<ApiUser> {
+        const u = db.sql<ApiUser>`
+            select * 
+            from users 
+            where id = ${id}`
         if (!u.length) throw new Error('Not found')
         return Promise.resolve(u[0])
     }
@@ -28,7 +29,7 @@ export class UserModel implements iUserModel {
         email: string,
         password: string,
     ): Promise<{ token: string; expires: number; type: tTokenType }> {
-        const [req] = db.sql<tRegister>`
+        const [req] = db.sql<ApiRegister & { password: string }>`
             select *
             from registers
             where email = ${email}`
@@ -60,15 +61,15 @@ export class UserModel implements iUserModel {
      * @returns
      * @throws {Error} Email already registered
      */
-    async register(email: string, password: string): Promise<tRegister> {
+    async register(email: string, password: string): Promise<ApiRegister> {
         const parsedEmail = z.string().email().safeParse(email)
         if (!parsedEmail.success) throw new Error('Invalid email')
-        const [r] = db.sql<tRegister>`
+        const [r] = db.sql<ApiRegister>`
             select *
             from registers
             where email = ${email}`
         if (r) throw new Error('Email already registered')
-        const [u] = db.sql<tRegister>`
+        const [u] = db.sql<ApiRegister>`
             INSERT INTO registers (
                 email, 
                 password
@@ -88,18 +89,18 @@ export class UserModel implements iUserModel {
      * @throws {Error} Invalid register id
      * @throws {Error} Username already registered
      */
-    create(register_id: number, username: string): Promise<tUser> {
-        const [reg] = db.sql<tRegister>`
+    create(register_id: number, username: string): Promise<ApiUser> {
+        const [reg] = db.sql<ApiRegister>`
             select *
             from registers
             where id = ${register_id}`
         if (!reg) throw new Error('Invalid register id')
-        const [u] = db.sql<tUser>`
+        const [u] = db.sql<ApiUser>`
             select *
             from users
             where username = ${username}`
         if (u) throw new Error('Username already registered')
-        const [user] = db.sql<tUser>`
+        const [user] = db.sql<ApiUser>`
             insert into users (
                 username
             )
@@ -118,8 +119,8 @@ export class UserModel implements iUserModel {
      * @returns
      * @throws {Error} Register not found
      */
-    getRegister(id: number): Promise<tRegister> {
-        const r = db.sql<tRegister>`
+    getRegister(id: number): Promise<ApiRegister & { password: string }> {
+        const r = db.sql<ApiRegister & { password: string }>`
             select *
             from registers
             where id = ${id}`
@@ -135,9 +136,9 @@ export class UserModel implements iUserModel {
      */
     update(
         { username, displayname, id }: { username?: string | undefined; displayname?: string | null; id: number },
-    ): Promise<tUser> {
+    ): Promise<ApiUser> {
         if (username) {
-            const [u] = db.sql<tUser>`
+            const [u] = db.sql<ApiUser>`
                 select *
                 from users
                 where username = ${username}`
@@ -153,7 +154,7 @@ export class UserModel implements iUserModel {
                 set displayname = ${displayname}
                 where id = ${id}`
         }
-        const [user] = db.sql<tUser>`
+        const [user] = db.sql<ApiUser>`
             select *
             from users
             where id = ${id}`
@@ -166,7 +167,7 @@ export class UserModel implements iUserModel {
      * @returns
      * @throws {Error} User not found
      */
-    async setAvatar(id: number, avatar: File): Promise<tUser> {
+    async setAvatar(id: number, avatar: File): Promise<ApiUser> {
         const old = await this.get(id)
         await Deno.mkdir(Deno.cwd() + `/sql/storage/avatars/olds`, { recursive: true }).catch(() => {})
         if (old.avatar) {
@@ -177,7 +178,7 @@ export class UserModel implements iUserModel {
         }
         const now = Date.now()
         await Deno.writeFile(Deno.cwd() + `/sql/storage/avatars/${id}-${now}.png`, avatar.stream())
-        const [user] = db.sql<tUser>`
+        const [user] = db.sql<ApiUser>`
             update users
             set avatar = ${id + '-' + now + '.png'}
             where id = ${id}
