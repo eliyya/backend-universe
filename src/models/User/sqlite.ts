@@ -1,12 +1,12 @@
 import { z } from '@zod/mod.ts'
 import { compare, hash } from '@utils/hash.ts'
 import db from '@db/sqlite.ts'
-import { iUserModel } from '@interfaces/User.ts'
+import { UserModel } from '@interfaces/User.ts'
 import { generateToken } from '@utils/token.ts'
 import { TOKEN_TYPES, tTokenType } from '@constants'
 import { ApiRegister, ApiUser } from '@apiTypes'
 
-export class UserModel implements iUserModel {
+export class UserSqliteModel implements UserModel {
     /**
      * @throws {Error} Not found
      */

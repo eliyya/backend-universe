@@ -9,7 +9,7 @@ export type tUserToken = {
     type: tTokenType
 }
 
-export interface iUserModel {
+export interface UserModel {
     get(id: number): Promise<ApiUser>
     register(email: string, password: string): Promise<ApiRegister>
     login(

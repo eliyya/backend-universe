@@ -1,3 +1,3 @@
-export interface iImgsModel {
+export interface ImgModel {
     getAvatar(id: string): Promise<File>
 }

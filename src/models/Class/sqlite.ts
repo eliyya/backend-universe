@@ -1,8 +1,8 @@
 import db from '@db/sqlite.ts'
-import { iClass } from '@interfaces/Class.ts'
+import { ClassModel } from '@interfaces/Class.ts'
 import { ApiClass } from '@apiTypes'
 
-export class ClassModel implements iClass {
+export class ClassSqliteModel implements ClassModel {
     async create(
         options:
             & Omit<Partial<ApiClass>, 'id' | 'created_at'>

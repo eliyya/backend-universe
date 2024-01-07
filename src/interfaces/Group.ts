@@ -1,5 +1,5 @@
 import { ApiGroup } from '@apiTypes'
-export interface iGroupModel {
+export interface GroupModel {
     get(id: number): Promise<ApiGroup>
     create(options: { name: string; description?: string; owner_id: number }): Promise<ApiGroup>
     update(options: { id: number; name?: string; description?: string | null }): Promise<ApiGroup>

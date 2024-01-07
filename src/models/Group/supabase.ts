@@ -1,9 +1,9 @@
-import { iGroupModel } from '@interfaces/Group.ts'
+import { GroupModel } from '@interfaces/Group.ts'
 
 import supabase from '@db/supabase.ts'
 import { ApiGroup } from '@apiTypes'
 
-export class GroupModel implements iGroupModel {
+export class GroupSupabaseModel implements GroupModel {
     /**
      * @param id
      * @returns

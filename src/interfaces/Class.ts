@@ -1,6 +1,6 @@
 import { ApiClass } from '@apiTypes'
 
-export interface iClass {
+export interface ClassModel {
     get(id: number): Promise<ApiClass>
     create(
         options:

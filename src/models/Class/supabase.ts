@@ -1,9 +1,9 @@
-import { iClass } from '@interfaces/Class.ts'
+import { ClassModel } from '@interfaces/Class.ts'
 import supabase from '@db/supabase.ts'
 import { captureException } from '@error'
 import { ApiClass } from '@apiTypes'
 
-export class ClassModel implements iClass {
+export class ClassSupabaseModel implements ClassModel {
     async create(
         options:
             & Omit<Partial<ApiClass>, 'id' | 'created_at'>

@@ -1,7 +1,7 @@
-import { iImgsModel } from '@interfaces/Imgs.ts'
+import { ImgModel } from '@interfaces/Imgs.ts'
 import supabase from '@db/supabase.ts'
 
-export class ImgsModel implements iImgsModel {
+export class ImgSupabaseModel implements ImgModel {
     async getAvatar(id: string): Promise<File> {
         const f = await supabase
             .storage

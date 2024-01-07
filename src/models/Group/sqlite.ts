@@ -1,8 +1,8 @@
-import { iGroupModel } from '@interfaces/Group.ts'
+import { GroupModel } from '@interfaces/Group.ts'
 import db from '@db/sqlite.ts'
 import { ApiGroup } from '@apiTypes'
 
-export class GroupModel implements iGroupModel {
+export class GroupSqliteModel implements GroupModel {
     get(id: number): Promise<ApiGroup> {
         const [g] = db.sql<ApiGroup>`
             select 
