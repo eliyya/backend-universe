@@ -1,6 +1,7 @@
-import { iGroupModel, tGroup } from '@interfaces/Group.ts'
+import { iGroupModel } from '@interfaces/Group.ts'
 
 import supabase from '@db/supabase.ts'
+import { ApiGroup } from '@apiTypes'
 
 export class GroupModel implements iGroupModel {
     /**
@@ -8,24 +9,25 @@ export class GroupModel implements iGroupModel {
      * @returns
      * @throws {Error} Group not found
      */
-    async get(id: number): Promise<tGroup> {
-        console.log('get group', id)
-
+    async get(id: number): Promise<ApiGroup> {
         const { data, error } = await supabase
             .from('groups')
             .select()
             .eq('id', id)
         if (error) {
-            console.log(error)
+            console.error(error)
             throw error
         } else {
             if (data?.length) {
-                return data[0]
+                return {
+                    ...data[0],
+                    created_at: new Date(data[0].created_at).getTime(),
+                }
             } else throw new Error('Group not found')
         }
     }
 
-    async create(options: { name: string; description?: string | undefined; owner_id: number }): Promise<tGroup> {
+    async create(options: { name: string; description?: string | undefined; owner_id: number }): Promise<ApiGroup> {
         const req = await supabase
             .from('groups')
             .insert({
@@ -40,10 +42,13 @@ export class GroupModel implements iGroupModel {
             throw req.error
         }
         const [g] = req.data
-        return g
+        return {
+            ...g,
+            created_at: new Date(g.created_at).getTime(),
+        }
     }
 
-    async getAllOfUser(user_id: number): Promise<tGroup[]> {
+    async getAllOfUser(user_id: number): Promise<ApiGroup[]> {
         const ow = await supabase
             .from('groups')
             .select()
@@ -60,7 +65,12 @@ export class GroupModel implements iGroupModel {
             console.error(mem.error)
             throw mem.error
         }
-        return [...new Set([...ow.data, ...mem.data])]
+        return [
+            ...new Set([
+                ...ow.data.map((e) => ({ ...e, created_at: new Date(e.created_at).getTime() })),
+                ...mem.data.map((e) => ({ ...e, created_at: new Date(e.created_at).getTime() })),
+            ]),
+        ]
     }
 
     /**
@@ -70,7 +80,7 @@ export class GroupModel implements iGroupModel {
      * @throws {Error} Group not found
      * @throws {Error} User is already member
      */
-    async addMember(options: { id: number; user_id: number }): Promise<tGroup> {
+    async addMember(options: { id: number; user_id: number }): Promise<ApiGroup> {
         const old = await this.get(options.id)
         if (old.owner_id === options.user_id) throw new Error('User is already owner')
         if (old.member_ids.includes(options.user_id)) throw new Error('User is already member')
@@ -86,7 +96,10 @@ export class GroupModel implements iGroupModel {
             throw req.error
         }
         const [g] = req.data
-        return g
+        return {
+            ...g,
+            created_at: new Date(g.created_at).getTime(),
+        }
     }
 
     /**
@@ -95,7 +108,7 @@ export class GroupModel implements iGroupModel {
      * @throws {Error} User is already owner
      * @throws {Error} Group not found
      */
-    async removeMember(options: { id: number; user_id: number }): Promise<tGroup> {
+    async removeMember(options: { id: number; user_id: number }): Promise<ApiGroup> {
         const old = await this.get(options.id)
         if (old.owner_id === options.user_id) throw new Error('User is already owner')
         if (!old.member_ids.includes(options.user_id)) return old
@@ -111,7 +124,10 @@ export class GroupModel implements iGroupModel {
             throw req.error
         }
         const [g] = req.data
-        return g
+        return {
+            ...g,
+            created_at: new Date(g.created_at).getTime(),
+        }
     }
 
     /**
@@ -134,7 +150,7 @@ export class GroupModel implements iGroupModel {
      * @param
      * @returns
      */
-    async update(options: { id: number; name?: string; description?: string | null }): Promise<tGroup> {
+    async update(options: { id: number; name?: string; description?: string | null }): Promise<ApiGroup> {
         const req = await supabase
             .from('groups')
             .update({
@@ -148,6 +164,9 @@ export class GroupModel implements iGroupModel {
             throw req.error
         }
         const [g] = req.data
-        return g
+        return {
+            ...g,
+            created_at: new Date(g.created_at).getTime(),
+        }
     }
 }

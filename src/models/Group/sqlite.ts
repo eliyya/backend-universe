@@ -1,9 +1,10 @@
-import { iGroupModel, tGroup } from '@interfaces/Group.ts'
+import { iGroupModel } from '@interfaces/Group.ts'
 import db from '@db/sqlite.ts'
+import { ApiGroup } from '@apiTypes'
 
 export class GroupModel implements iGroupModel {
-    get(id: number): Promise<tGroup> {
-        const [g] = db.sql<tGroup>`
+    get(id: number): Promise<ApiGroup> {
+        const [g] = db.sql<ApiGroup>`
             select 
                 groups.*, 
                 json_group_array(group_members.user_id) 
@@ -15,8 +16,8 @@ export class GroupModel implements iGroupModel {
         return Promise.resolve(g)
     }
 
-    create(options: { name: string; description?: string; owner_id: number }): Promise<tGroup> {
-        const [g] = db.sql<tGroup>`
+    create(options: { name: string; description?: string; owner_id: number }): Promise<ApiGroup> {
+        const [g] = db.sql<ApiGroup>`
             insert into groups (
                 name, 
                 description, 
@@ -31,7 +32,7 @@ export class GroupModel implements iGroupModel {
         return Promise.resolve(g)
     }
 
-    update(options: { id: number; name?: string; description?: string | null }): Promise<tGroup> {
+    update(options: { id: number; name?: string; description?: string | null }): Promise<ApiGroup> {
         if (options.name) {
             db.sql`
                 update groups
@@ -54,7 +55,7 @@ export class GroupModel implements iGroupModel {
         return Promise.resolve()
     }
 
-    addMember(options: { id: number; user_id: number }): Promise<tGroup> {
+    addMember(options: { id: number; user_id: number }): Promise<ApiGroup> {
         db.sql`
             insert into group_members (
                 group_id,
@@ -67,7 +68,7 @@ export class GroupModel implements iGroupModel {
         return this.get(options.id)
     }
 
-    removeMember(options: { id: number; user_id: number }): Promise<tGroup> {
+    removeMember(options: { id: number; user_id: number }): Promise<ApiGroup> {
         db.sql`
             delete from group_members
             where group_id = ${options.id}
@@ -75,7 +76,7 @@ export class GroupModel implements iGroupModel {
         return this.get(options.id)
     }
 
-    getAllOfUser(user_id: number): Promise<tGroup[]> {
+    getAllOfUser(user_id: number): Promise<ApiGroup[]> {
         const [m] = db.sql<{ group_ids: number[] }>`
             select json_group_array(id) as group_ids
             from groups
