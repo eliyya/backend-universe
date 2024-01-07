@@ -10,13 +10,13 @@ const [{ names }] = db.sql<{ names: string[] }>`
 
 for (const name of names.filter((name) => name !== 'sqlite_sequence')) {
     const t = db.prepare('pragma table_info(' + name + ')').all()
-    output += `export type ${snakeToCamel('db_' + name)} = {\n`
+    output += `${output.length ? '\n' : ''}export type ${snakeToCamel('db_' + name)} = {\n`
     for (const column of t) {
         output += `    '${column.name}': ${sqliteTypeToTsType(column.type)}${
             column.notnull || column.pk ? '' : ' | null'
         }\n`
     }
-    output += '}\n\n'
+    output += '}\n'
     console.log('generated interface for table ' + name)
 }
 
