@@ -1,13 +1,13 @@
 import db from '@db/sqlite.ts'
-import { iClass, tClass } from '@interfaces/Class.ts'
+import { iClass } from '@interfaces/Class.ts'
+import { ApiClass } from '@apiTypes'
 
 export class ClassModel implements iClass {
-    // deno-lint-ignore require-await
     async create(
         options:
-            & Omit<Partial<tClass>, 'id' | 'created_at'>
-            & Pick<tClass, 'name' | 'teacher_id' | 'subject'>,
-    ): Promise<tClass> {
+            & Omit<Partial<ApiClass>, 'id' | 'created_at'>
+            & Pick<ApiClass, 'name' | 'teacher_id' | 'subject'>,
+    ): Promise<ApiClass> {
         db.sql`
             insert into classes (
                 name, 
@@ -49,24 +49,23 @@ export class ClassModel implements iClass {
                     .join(',')
             }`
         }
-        const [c] = db.sql<tClass>`
+        const [c] = db.sql<ApiClass>`
             select * 
             from classes 
             where id = ${classId}`
-        return c
+        return await Promise.resolve(c)
     }
 
-    // deno-lint-ignore require-await
     async delete(id: number): Promise<void> {
         db.sql`
             delete 
             from classes 
             where id = ${id}`
+        return await Promise.resolve()
     }
 
-    // deno-lint-ignore require-await
-    async get(id: number): Promise<tClass> {
-        const [c] = db.sql<Omit<tClass, 'group_ids' | 'member_ids'>>`
+    async get(id: number): Promise<ApiClass> {
+        const [c] = db.sql<Omit<ApiClass, 'group_ids' | 'member_ids'>>`
             select * 
             from classes 
             where id = ${id}`
@@ -78,17 +77,17 @@ export class ClassModel implements iClass {
             select user_id 
             from class_members 
             where class_id = ${id}`
-        return {
+        return await Promise.resolve({
             ...c,
             group_ids: group_ids.map(({ group_id }) => group_id),
             member_ids: member_ids.map(({ user_id }) => user_id),
-        }
+        })
     }
 
     async update(
         id: number,
-        options: Omit<Partial<tClass>, 'id'>,
-    ): Promise<tClass> {
+        options: Omit<Partial<ApiClass>, 'id'>,
+    ): Promise<ApiClass> {
         const c = await this.get(id)
         if (!c) throw new Error('Class not found')
         if (

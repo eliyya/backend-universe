@@ -1,13 +1,14 @@
-import { iClass, tClass } from '@interfaces/Class.ts'
+import { iClass } from '@interfaces/Class.ts'
 import supabase from '@db/supabase.ts'
 import { Sentry } from '@error'
+import { ApiClass } from '@apiTypes'
 
 export class ClassModel implements iClass {
     async create(
         options:
-            & Omit<Partial<tClass>, 'id' | 'created_at'>
-            & Pick<tClass, 'name' | 'teacher_id' | 'subject'>,
-    ): Promise<tClass> {
+            & Omit<Partial<ApiClass>, 'id' | 'created_at'>
+            & Pick<ApiClass, 'name' | 'teacher_id' | 'subject'>,
+    ): Promise<ApiClass> {
         const r = await supabase.from('classes').insert({
             name: options.name,
             teacher_id: options.teacher_id,
@@ -22,27 +23,33 @@ export class ClassModel implements iClass {
             Sentry.captureException(r.error)
             throw new Error(JSON.stringify(r))
         }
-        return r.data[0]
+        return {
+            ...r.data[0],
+            created_at: new Date(r.data[0].created_at).getTime(),
+        }
     }
 
     async delete(id: number): Promise<void> {
         await supabase.from('classes').delete().match({ id })
     }
 
-    async get(id: number): Promise<tClass> {
+    async get(id: number): Promise<ApiClass> {
         const r = await supabase.from('classes').select().match({ id })
         if (r.error) {
             console.error(r.error)
             Sentry.captureException(r.error)
             throw new Error(JSON.stringify(r))
         }
-        return r.data[0]
+        return {
+            ...r.data[0],
+            created_at: new Date(r.data[0].created_at).getTime(),
+        }
     }
 
     async update(
         id: number,
-        options: Omit<Partial<tClass>, 'id'>,
-    ): Promise<tClass> {
+        options: Omit<Partial<ApiClass>, 'id'>,
+    ): Promise<ApiClass> {
         const c = await this.get(id)
         if (!c) throw new Error(`Class ${id} not found`)
         const r = await supabase.from('classes').update({
@@ -59,6 +66,9 @@ export class ClassModel implements iClass {
             Sentry.captureException(r.error)
             throw new Error(JSON.stringify(r))
         }
-        return r.data[0]
+        return {
+            ...r.data[0],
+            created_at: new Date(r.data[0].created_at).getTime(),
+        }
     }
 }
