@@ -5,13 +5,14 @@ import { UserModel } from '@interfaces/User.ts'
 import { generateToken } from '@utils/token.ts'
 import { TOKEN_TYPES, tTokenType } from '@constants'
 import { ApiRegister, ApiUser } from '@apiTypes'
+import { dbRegisters, dbUsers } from '@db/sqlite.types.ts'
 
 export class UserSqliteModel implements UserModel {
     /**
      * @throws {Error} Not found
      */
     get(id: number): Promise<ApiUser> {
-        const u = db.sql<ApiUser>`
+        const u = db.sql<dbUsers>`
             select * 
             from users 
             where id = ${id}`
@@ -29,7 +30,7 @@ export class UserSqliteModel implements UserModel {
         email: string,
         password: string,
     ): Promise<{ token: string; expires: number; type: tTokenType }> {
-        const [req] = db.sql<ApiRegister & { password: string }>`
+        const [req] = db.sql<dbRegisters>`
             select *
             from registers
             where email = ${email}`
@@ -64,12 +65,12 @@ export class UserSqliteModel implements UserModel {
     async register(email: string, password: string): Promise<ApiRegister> {
         const parsedEmail = z.string().email().safeParse(email)
         if (!parsedEmail.success) throw new Error('Invalid email')
-        const [r] = db.sql<ApiRegister>`
+        const [r] = db.sql<dbRegisters>`
             select *
             from registers
             where email = ${email}`
         if (r) throw new Error('Email already registered')
-        const [u] = db.sql<ApiRegister>`
+        const [u] = db.sql<dbRegisters>`
             INSERT INTO registers (
                 email, 
                 password
@@ -79,7 +80,12 @@ export class UserSqliteModel implements UserModel {
                 ${await hash(password)}
             )
             returning *`
-        return u
+        return {
+            id: u.id,
+            email: u.email,
+            user_id: u.user_id,
+            created_at: new Date(u.created_at).getTime(),
+        }
     }
 
     /**
@@ -90,17 +96,17 @@ export class UserSqliteModel implements UserModel {
      * @throws {Error} Username already registered
      */
     create(register_id: number, username: string): Promise<ApiUser> {
-        const [reg] = db.sql<ApiRegister>`
+        const [reg] = db.sql<dbRegisters>`
             select *
             from registers
             where id = ${register_id}`
         if (!reg) throw new Error('Invalid register id')
-        const [u] = db.sql<ApiUser>`
+        const [u] = db.sql<dbUsers>`
             select *
             from users
             where username = ${username}`
         if (u) throw new Error('Username already registered')
-        const [user] = db.sql<ApiUser>`
+        const [user] = db.sql<dbUsers>`
             insert into users (
                 username
             )
@@ -120,13 +126,16 @@ export class UserSqliteModel implements UserModel {
      * @throws {Error} Register not found
      */
     getRegister(id: number): Promise<ApiRegister & { password: string }> {
-        const r = db.sql<ApiRegister & { password: string }>`
+        const r = db.sql<dbRegisters>`
             select *
             from registers
             where id = ${id}`
         if (!r.length) throw new Error('Register not found')
         const [reg] = r
-        return Promise.resolve(reg)
+        return Promise.resolve({
+            ...reg,
+            created_at: new Date(reg.created_at).getTime(),
+        })
     }
 
     /**
@@ -138,7 +147,7 @@ export class UserSqliteModel implements UserModel {
         { username, displayname, id }: { username?: string | undefined; displayname?: string | null; id: number },
     ): Promise<ApiUser> {
         if (username) {
-            const [u] = db.sql<ApiUser>`
+            const [u] = db.sql<dbUsers>`
                 select *
                 from users
                 where username = ${username}`
@@ -154,7 +163,7 @@ export class UserSqliteModel implements UserModel {
                 set displayname = ${displayname}
                 where id = ${id}`
         }
-        const [user] = db.sql<ApiUser>`
+        const [user] = db.sql<dbUsers>`
             select *
             from users
             where id = ${id}`
@@ -178,7 +187,7 @@ export class UserSqliteModel implements UserModel {
         }
         const now = Date.now()
         await Deno.writeFile(Deno.cwd() + `/sql/storage/avatars/${id}-${now}.png`, avatar.stream())
-        const [user] = db.sql<ApiUser>`
+        const [user] = db.sql<dbUsers>`
             update users
             set avatar = ${id + '-' + now + '.png'}
             where id = ${id}

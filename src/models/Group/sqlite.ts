@@ -1,10 +1,11 @@
 import { GroupModel } from '@interfaces/Group.ts'
 import db from '@db/sqlite.ts'
 import { ApiGroup } from '@apiTypes'
+import { dbGroups } from '@db/sqlite.types.ts'
 
 export class GroupSqliteModel implements GroupModel {
     get(id: number): Promise<ApiGroup> {
-        const [g] = db.sql<ApiGroup>`
+        const [g] = db.sql<dbGroups & { member_ids: number[] }>`
             select 
                 groups.*, 
                 json_group_array(group_members.user_id) 
@@ -13,11 +14,14 @@ export class GroupSqliteModel implements GroupModel {
             left join group_members
             on groups.id = group_members.group_id
             where groups.id = ${id}`
-        return Promise.resolve(g)
+        return Promise.resolve({
+            ...g,
+            created_at: new Date(g.created_at).getTime(),
+        })
     }
 
     create(options: { name: string; description?: string; owner_id: number }): Promise<ApiGroup> {
-        const [g] = db.sql<ApiGroup>`
+        const [g] = db.sql<dbGroups>`
             insert into groups (
                 name, 
                 description, 
@@ -28,8 +32,11 @@ export class GroupSqliteModel implements GroupModel {
                 ${options.description ?? null},
                 ${options.owner_id},
             ) returning *`
-        g.member_ids = []
-        return Promise.resolve(g)
+        return Promise.resolve({
+            ...g,
+            created_at: new Date(g.created_at).getTime(),
+            member_ids: [],
+        })
     }
 
     update(options: { id: number; name?: string; description?: string | null }): Promise<ApiGroup> {

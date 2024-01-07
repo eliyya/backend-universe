@@ -1,6 +1,7 @@
 import db from '@db/sqlite.ts'
 import { ClassModel } from '@interfaces/Class.ts'
 import { ApiClass } from '@apiTypes'
+import { dbClasses } from '@db/sqlite.types.ts'
 
 export class ClassSqliteModel implements ClassModel {
     async create(
@@ -65,7 +66,7 @@ export class ClassSqliteModel implements ClassModel {
     }
 
     async get(id: number): Promise<ApiClass> {
-        const [c] = db.sql<Omit<ApiClass, 'group_ids' | 'member_ids'>>`
+        const [c] = db.sql<Omit<dbClasses, 'group_ids' | 'member_ids'>>`
             select * 
             from classes 
             where id = ${id}`
@@ -79,6 +80,7 @@ export class ClassSqliteModel implements ClassModel {
             where class_id = ${id}`
         return await Promise.resolve({
             ...c,
+            created_at: new Date(c.created_at).getTime(),
             group_ids: group_ids.map(({ group_id }) => group_id),
             member_ids: member_ids.map(({ user_id }) => user_id),
         })

@@ -1,49 +1,48 @@
-export interface dbRegisters {
-    'id'?: number | null
+export type dbRegisters = {
+    'id': number
     'created_at': string
     'email': string
     'password': string
-    'user_id'?: number | null
+    'user_id': number | null
 }
 
-export interface dbUsers {
-    'id'?: number | null
+export type dbUsers = {
+    'id': number
     'username': string
-    'displayname'?: string | null
-    'avatar'?: string | null
+    'displayname': string | null
+    'avatar': string | null
 }
 
-export interface dbClasses {
-    'id'?: number | null
+export type dbClasses = {
+    'id': number
     'created_at': string
     'name': string
     'subject': string
     'teacher_id': number
-    'icon'?: string | null
-    'description'?: string | null
+    'icon': string | null
+    'description': string | null
 }
 
-export interface dbClassMembers {
+export type dbClassMembers = {
     'class_id': number
     'user_id': number
 }
 
-export interface dbClassGroups {
+export type dbClassGroups = {
     'class_id': number
     'group_id': number
 }
 
-export interface dbGroupMembers {
+export type dbGroupMembers = {
     'group_id': number
     'user_id': number
 }
 
-export interface dbGroups {
-    'id'?: number | null
+export type dbGroups = {
+    'id': number
     'created_at': string
     'owner_id': number
     'name': string
-    'icon'?: string | null
-    'description'?: string | null
+    'icon': string | null
+    'description': string | null
 }
-
