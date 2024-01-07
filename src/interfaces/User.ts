@@ -1,4 +1,4 @@
-import { tTokenType } from '@constants'
+import { TokenType } from '@constants'
 import { ApiRegister, ApiUser } from '@apiTypes'
 
 export type tUserToken = {
@@ -6,7 +6,7 @@ export type tUserToken = {
     id: string
     created_at: string
     user?: ApiUser
-    type: tTokenType
+    type: TokenType
 }
 
 export interface UserModel {
@@ -15,7 +15,7 @@ export interface UserModel {
     login(
         email: string,
         password: string,
-    ): Promise<{ token: string; expires: number; type: tTokenType }>
+    ): Promise<{ token: string; expires: number; type: TokenType }>
     create(register_id: number, username: string): Promise<ApiUser>
     getRegister(id: number): Promise<ApiRegister & { password: string }>
     update(options: { username?: string; displayname?: string | null }): Promise<ApiUser>

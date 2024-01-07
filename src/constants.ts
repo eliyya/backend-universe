@@ -3,4 +3,4 @@ export const TOKEN_TYPES = {
     Bearer: 'Bearer',
 } as const
 
-export type tTokenType = typeof TOKEN_TYPES[keyof typeof TOKEN_TYPES]
+export type TokenType = typeof TOKEN_TYPES[keyof typeof TOKEN_TYPES]

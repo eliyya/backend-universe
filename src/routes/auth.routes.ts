@@ -3,7 +3,7 @@ import { userController } from '@controller'
 import { z } from '@zod/mod.ts'
 import { zJSONValidator } from '@middlewares/validators.ts'
 import { captureException } from '@error'
-import { TOKEN_TYPES, tTokenType } from '@constants'
+import { TOKEN_TYPES, TokenType } from '@constants'
 import { decodeToken, generateToken } from '@utils/token.ts'
 import { tUserToken } from '@interfaces/User.ts'
 import { Register } from '@classes/Register.ts'
@@ -34,7 +34,7 @@ export default new Hono()
         if (!authorization) {
             return ctx.json({ message: 'Unauthorized' }, 401)
         }
-        const [type, token] = authorization.split(' ') as [tTokenType, string]
+        const [type, token] = authorization.split(' ') as [TokenType, string]
         const { expires, email, id, created_at } = await decodeToken<tUserToken>(token)
         if (expires < Date.now()) {
             return ctx.json({ message: 'Unauthorized' }, 401)

@@ -3,7 +3,7 @@ import { compare, hash } from '@utils/hash.ts'
 import db from '@db/sqlite.ts'
 import { UserModel } from '@interfaces/User.ts'
 import { generateToken } from '@utils/token.ts'
-import { TOKEN_TYPES, tTokenType } from '@constants'
+import { TOKEN_TYPES, TokenType } from '@constants'
 import { ApiRegister, ApiUser } from '@apiTypes'
 import { dbRegisters, dbUsers } from '@db/sqlite.types.ts'
 
@@ -29,7 +29,7 @@ export class UserSqliteModel implements UserModel {
     async login(
         email: string,
         password: string,
-    ): Promise<{ token: string; expires: number; type: tTokenType }> {
+    ): Promise<{ token: string; expires: number; type: TokenType }> {
         const [req] = db.sql<dbRegisters>`
             select *
             from registers

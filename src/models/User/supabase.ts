@@ -3,7 +3,7 @@ import { compare, hash } from '@utils/hash.ts'
 import supabase from '@db/supabase.ts'
 import { UserModel } from '@interfaces/User.ts'
 import { generateToken } from '@utils/token.ts'
-import { TOKEN_TYPES, tTokenType } from '@constants'
+import { TOKEN_TYPES, TokenType } from '@constants'
 import { ApiRegister, ApiUser } from '@apiTypes'
 
 export class UserSupabaseModel implements UserModel {
@@ -59,7 +59,7 @@ export class UserSupabaseModel implements UserModel {
     async login(
         email: string,
         password: string,
-    ): Promise<{ token: string; expires: number; type: tTokenType }> {
+    ): Promise<{ token: string; expires: number; type: TokenType }> {
         const req = await supabase
             .from('registers')
             .select()
