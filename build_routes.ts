@@ -3,18 +3,19 @@
 import { walkSync } from 'https://deno.land/std@0.211.0/fs/mod.ts'
 
 const indexFilePath = 'src/index.ts'
+const comment = "// IMPORTANT: DON'T TOUCH THIS LINES"
 
 if (!Deno.statSync(indexFilePath).isFile) {
     throw new Error('El archivo index.ts no existe en el directorio actual.')
 }
 const indexContent = await Deno.readTextFile(indexFilePath)
-const lineIndex = indexContent.indexOf("// IMPORTANT: DON'T TOUCH THIS LINES")
+const lineIndex = indexContent.indexOf(comment)
 
 if (lineIndex === -1) {
-    throw new Error("No se encontró el comentario '// IMPORTANT: DON'T TOUCH THIS LINES' en el archivo index.ts.")
+    throw new Error(`No se encontró el comentario '${comment}' en el archivo index.ts`)
 }
 
-let newContent = indexContent.substring(0, lineIndex)
+let newContent = indexContent.substring(0, lineIndex + comment.length)
 
 let ifile = 0
 for (const file of [...walkSync('src/routes', { exts: ['ts'], includeDirs: false })].map((f) => f.path)) {

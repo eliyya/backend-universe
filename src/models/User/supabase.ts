@@ -5,26 +5,30 @@ import { UserModel } from '@interfaces/User.ts'
 import { generateToken } from '@utils/token.ts'
 import { TOKEN_TYPES, TokenType } from '@constants'
 import { ApiRegister, ApiUser } from '@apiTypes'
-import { AuthError, DataBaseError, SupabaseError } from '@error'
+import { AuthError, DataBaseError, DuplicateError, InvalidTypeError, NotFoundError, SupabaseError } from '@error'
 
 export class UserSupabaseModel implements UserModel {
     /**
      * @description Get user by id
      * @param {number} id User id
      * @returns {Promise<ApiUser>}
+     * @throws {DataBaseError} User not found
      * @throws {SupabaseError}
      * @example await get(1)
      */
     async get(id: number): Promise<ApiUser> {
-        const req = await supabase
+        const user = await supabase
             .from('users')
             .select()
             .eq('id', id)
-        if (req.error) {
-            throw new SupabaseError(req.error)
+            .single()
+        if (user.error) {
+            if (user.error.details === 'The result contains 0 rows') {
+                throw new NotFoundError('User')
+            }
+            throw new SupabaseError(user.error)
         }
-        const [u] = req.data
-        return u
+        return user.data
     }
 
     /**
@@ -32,32 +36,25 @@ export class UserSupabaseModel implements UserModel {
      * @param {string} email User email
      * @param {string} password User password
      * @returns {Promise<ApiRegister>}
-     * @throws {DataBaseError} "email" already exists
-     * @throws {DataBaseError} Invalid "email"
+     * @throws {DuplicateError} email already exists
+     * @throws {InvalidTypeError} email type is invalid
      * @throws {SupabaseError}
      * @example await register('user@example.com', 'password')
      */
     async register(email: string, password: string): Promise<ApiRegister> {
         const parsedEmail = z.string().email().safeParse(email)
-        if (!parsedEmail.success) throw DataBaseError.Invalid('"email"')
-        const req = await supabase
-            .from('registers')
-            .select()
-            .eq('email', email)
-        if (req.error) {
-            throw new SupabaseError(req.error)
-        }
-        if (req.data?.length) throw DataBaseError.Duplicate('"email"')
+        if (!parsedEmail.success) throw new InvalidTypeError('email', parsedEmail.error)
         const r = await supabase
             .from('registers')
             .insert({ email, password: await hash(password) })
             .select()
+            .single()
         if (r.error) {
             throw new SupabaseError(r.error)
         }
         return {
-            ...r.data[0],
-            created_at: new Date(r.data[0].created_at).getTime(),
+            ...r.data,
+            created_at: new Date(r.data.created_at).getTime(),
         }
     }
 
@@ -121,7 +118,7 @@ export class UserSupabaseModel implements UserModel {
         if (req.error) {
             throw new SupabaseError(req.error)
         }
-        if (!req.data?.length) throw DataBaseError.NotFound()
+        if (!req.data?.length) throw new NotFoundError()
         const req2 = await supabase
             .from('users')
             .select()
@@ -165,7 +162,7 @@ export class UserSupabaseModel implements UserModel {
         if (r.error) {
             throw new SupabaseError(r.error)
         }
-        if (!r.data?.length) throw DataBaseError.NotFound()
+        if (!r.data?.length) throw new NotFoundError()
         const [reg] = r.data
         return {
             ...reg,

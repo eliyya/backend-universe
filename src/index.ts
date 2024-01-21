@@ -14,7 +14,7 @@ app.onError((error, ctx) => {
     return ctx.json({ message: 'Internal server error' }, 500)
 })
 
-
+// IMPORTANT: DON'T TOUCH THIS LINES
 import _0 from './routes/auth.routes.ts'
 app.route('/auth', _0)
 import _1 from './routes/api/users.routes.ts'

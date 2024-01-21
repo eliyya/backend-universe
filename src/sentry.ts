@@ -57,25 +57,38 @@ export class DataBaseError extends Error {
 
     /**
      * @param {string} [u='Register']
-     * @returns {DataBaseError} {u ?? 'Register'} not found
-     * @example DataBaseError.NotFound('User')
-     */
-    static NotFound = (u = 'Register') => new DataBaseError(`${u} not found`)
-
-    /**
-     * @param {string} [u='Register']
      * @returns {DataBaseError} {u ?? 'Register'} already exists
      * @example DataBaseError.Duplicate('"user"')
      */
     static Duplicate = (u = 'Register') => new DataBaseError(`${u} already exists`)
+}
 
-    /**
-     * @param {string} [u='Register']
-     * @param {any} [details]
-     * @returns {DataBaseError} Invalid {u ?? 'Register'}
-     * @example DataBaseError.Invalid('email', { error: zodError })
-     */
-    static Invalid = (u = 'Register', details?: any): DataBaseError => new DataBaseError(`Invalid ${u}`, details)
+export class NotFoundError extends DataBaseError {
+    name = 'NotFoundError'
+
+    constructor(err = 'Register', details?: any) {
+        super(err + ' not found')
+        this.cause = details
+    }
+}
+
+export class InvalidTypeError extends DataBaseError {
+    name = 'InvalidTypeError'
+    cause: unknown
+
+    constructor(err = 'Some param', details: any) {
+        super(err + ' type is invalid')
+        this.cause = details
+    }
+}
+
+export class DuplicateError extends DataBaseError {
+    name = 'DuplicateError'
+
+    constructor(err = 'Entry', details?: any) {
+        super(err + ' already exists')
+        this.cause = details
+    }
 }
 
 export class AuthError extends Error {
