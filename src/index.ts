@@ -20,12 +20,12 @@ import authApi from './routes/auth.routes.ts'
 app.route('/auth', authApi)
 import usersApi from './routes/api/users.routes.ts'
 app.route('/api/users', usersApi)
+import idApi from './routes/api/groups/:id.routes.ts'
+app.route('/api/groups/:id', idApi)
 import meApi from './routes/api/users/@me.routes.ts'
 app.route('/api/users/@me', meApi)
 import groupsApi from './routes/api/groups.routes.ts'
 app.route('/api/groups', groupsApi)
-import idApi from './routes/api/groups/:id.routes.ts'
-app.route('/api/groups/:id', idApi)
 import avatarsApi from './routes/img/avatars.routes.ts'
 app.route('/img/avatars', avatarsApi)
 Deno.serve(app.fetch)
