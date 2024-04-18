@@ -19,12 +19,12 @@ import _0 from './routes/auth.routes.ts'
 app.route('/auth', _0)
 import _1 from './routes/api/users.routes.ts'
 app.route('/api/users', _1)
-import _2 from './routes/api/users/@me.routes.ts'
-app.route('/api/users/@me', _2)
-import _3 from './routes/api/groups.routes.ts'
-app.route('/api/groups', _3)
-import _4 from './routes/api/groups/:id.routes.ts'
-app.route('/api/groups/:id', _4)
+import _2 from './routes/api/groups/:id.routes.ts'
+app.route('/api/groups/:id', _2)
+import _3 from './routes/api/users/@me.routes.ts'
+app.route('/api/users/@me', _3)
+import _4 from './routes/api/groups.routes.ts'
+app.route('/api/groups', _4)
 import _5 from './routes/img/avatars.routes.ts'
 app.route('/img/avatars', _5)
 

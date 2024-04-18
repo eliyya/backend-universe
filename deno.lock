@@ -779,5 +779,10 @@
     "https://esm.sh/v135/node-gyp-build@4.6.1/denonext/node-gyp-build.mjs": "5d28b312f145a6cb2ec0dbdd80a7d34c0e0e6b5dcada65411d8bcff6c8991cc6",
     "https://esm.sh/v135/utf-8-validate@6.0.3/denonext/utf-8-validate.mjs": "410c48d66840e987e474a4849cd25829817415cedd25466280effb1287d05aa5",
     "https://esm.sh/v135/ws@8.14.2/denonext/ws.mjs": "e96033415d90efd20ce6bec551447fc2771a27e232d05689c5410582cf04ee17"
+  },
+  "workspace": {
+    "dependencies": [
+      "npm:@sentry/node"
+    ]
   }
 }
