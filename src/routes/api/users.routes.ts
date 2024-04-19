@@ -2,7 +2,7 @@ import { Hono } from '@hono/mod.ts'
 import { User } from '@classes/User.ts'
 import { decodeToken } from '@utils/token.ts'
 import { tUserToken } from '@interfaces/User.ts'
-import { TOKEN_TYPES, tTokenType } from '@constants'
+import { TOKEN_TYPES, TokenType } from '@constants'
 import { zJSONValidator } from '@middlewares/validators.ts'
 import z from '@zod/index.ts'
 
@@ -29,7 +29,7 @@ usersApi.post(
         if (!authorization) {
             return ctx.json({ message: 'Unauthorized' }, 401)
         }
-        const [type, token] = authorization.split(' ') as [tTokenType, string]
+        const [type, token] = authorization.split(' ') as [TokenType, string]
         if (type !== TOKEN_TYPES.Register) {
             return ctx.json({ message: 'Unauthorized' }, 401)
         }

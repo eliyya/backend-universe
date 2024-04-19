@@ -3,7 +3,7 @@ import { type tUserToken } from '@interfaces/User.ts'
 import { decodeToken } from '@utils/token.ts'
 import { captureException } from '@error'
 import { User } from '@classes/User.ts'
-import { TOKEN_TYPES, tTokenType } from '@constants'
+import { TOKEN_TYPES, TokenType } from '@constants'
 
 export const auth: MiddlewareHandler<{ Variables: { user: User } }> = async (
     ctx,
@@ -14,7 +14,7 @@ export const auth: MiddlewareHandler<{ Variables: { user: User } }> = async (
         if (!authorization) {
             return ctx.json({ message: 'Unauthorized' }, 401)
         }
-        const [type, token] = authorization.split(' ') as [tTokenType, string]
+        const [type, token] = authorization.split(' ') as [TokenType, string]
         if (type !== TOKEN_TYPES.Bearer) {
             return ctx.json({ message: 'Unauthorized' }, 401)
         }

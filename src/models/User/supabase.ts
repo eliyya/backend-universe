@@ -3,76 +3,85 @@ import { compare, hash } from '@utils/hash.ts'
 import supabase from '@db/supabase.ts'
 import { UserModel } from '@interfaces/User.ts'
 import { generateToken } from '@utils/token.ts'
-import { TOKEN_TYPES, tTokenType } from '@constants'
+import { TOKEN_TYPES, TokenType } from '@constants'
 import { ApiRegister, ApiUser } from '@apiTypes'
+import { AuthError, DataBaseError, DuplicateError, InvalidTypeError, NotFoundError, SupabaseError } from '@error'
 
 export class UserSupabaseModel implements UserModel {
+    /**
+     * @description Get user by id
+     * @param {number} id User id
+     * @returns {Promise<ApiUser>}
+     * @throws {DataBaseError} User not found
+     * @throws {SupabaseError}
+     * @example await get(1)
+     */
     async get(id: number): Promise<ApiUser> {
-        const req = await supabase
+        const user = await supabase
             .from('users')
             .select()
             .eq('id', id)
-        if (req.error) {
-            console.error(req.error)
-            throw new Error(req.error.message)
+            .single()
+        if (user.error) {
+            if (user.error.details === 'The result contains 0 rows') {
+                throw new NotFoundError('User')
+            }
+            throw new SupabaseError(user.error)
         }
-        const [u] = req.data
-        return u
+        return user.data
     }
 
     /**
-     * @throws {Error} Email already registered
-     * @throws {Error} Invalid email
+     * @description Register a new user
+     * @param {string} email User email
+     * @param {string} password User password
+     * @returns {Promise<ApiRegister>}
+     * @throws {DuplicateError} email already exists
+     * @throws {InvalidTypeError} email type is invalid
+     * @throws {SupabaseError}
+     * @example await register('user@example.com', 'password')
      */
     async register(email: string, password: string): Promise<ApiRegister> {
         const parsedEmail = z.string().email().safeParse(email)
-        if (!parsedEmail.success) throw new Error('Invalid email')
-        const req = await supabase
-            .from('registers')
-            .select()
-            .eq('email', email)
-        if (req.error) {
-            console.error(req.error)
-            throw new Error(req.error.message)
-        }
-        if (req.data?.length) throw new Error('Email already registered')
+        if (!parsedEmail.success) throw new InvalidTypeError('email', parsedEmail.error)
         const r = await supabase
             .from('registers')
             .insert({ email, password: await hash(password) })
             .select()
+            .single()
         if (r.error) {
-            console.error(r.error)
-            throw new Error(r.error.message)
+            throw new SupabaseError(r.error)
         }
         return {
-            ...r.data[0],
-            created_at: new Date(r.data[0].created_at).getTime(),
+            ...r.data,
+            created_at: new Date(r.data.created_at).getTime(),
         }
     }
 
     /**
+     * @description Login user and return token
      * @param {string} email User email
-     * @param {string} password User password
-     * @returns {Promise<tUserToken>} Token and expires
-     * @throws {Error} Invalid user or password
+     * @param {string} password User password hashed
+     * @returns {Promise<tUserToken>} token, type and expires
+     * @throws {AuthError} Invalid email
+     * @throws {AuthError} Invalid password
+     * @throws {SupabaseError}
+     * @example await login('user@example.com', await hash('password'))
      */
     async login(
         email: string,
         password: string,
-    ): Promise<{ token: string; expires: number; type: tTokenType }> {
+    ): Promise<{ token: string; expires: number; type: TokenType }> {
         const req = await supabase
             .from('registers')
             .select()
             .eq('email', email)
         if (req.error) {
-            console.error(req.error)
-            throw new Error(req.error.message)
+            throw new SupabaseError(req.error)
         }
-        if (!req.data?.length) throw new Error('Invalid user or password')
+        if (!req.data?.length) throw AuthError.Invalid('email')
         const [u] = req.data
-        if (!(await compare(password, u.password))) {
-            throw new Error('Invalid user or password')
-        }
+        if (!(await compare(password, u.password))) throw AuthError.Invalid('password')
         if (u.user_id) {
             const user = await this.get(u.user_id)
             return generateToken({
@@ -92,11 +101,14 @@ export class UserSupabaseModel implements UserModel {
     }
 
     /**
-     * @param register_id
-     * @param username
-     * @returns
-     * @throws {Error} Invalid register id
-     * @throws {Error} Username already registered
+     * @description Create a new user
+     * @param {number} register_id Register id
+     * @param {string} username User username
+     * @returns {Promise<ApiUser>}
+     * @throws {DataBaseError} Register not found
+     * @throws {DataBaseError} "username" already exists
+     * @throws {SupabaseError}
+     * @example await create(1, 'username')
      */
     async create(register_id: number, username: string): Promise<ApiUser> {
         const req = await supabase
@@ -104,26 +116,23 @@ export class UserSupabaseModel implements UserModel {
             .select()
             .eq('id', register_id)
         if (req.error) {
-            console.error(req.error)
-            throw new Error(req.error.message)
+            throw new SupabaseError(req.error)
         }
-        if (!req.data?.length) throw new Error('Invalid register id')
+        if (!req.data?.length) throw new NotFoundError()
         const req2 = await supabase
             .from('users')
             .select()
             .eq('username', username)
         if (req2.error) {
-            console.error(req2.error)
-            throw new Error(req2.error.message)
+            throw new SupabaseError(req2.error)
         }
-        if (req2.data?.length) throw new Error('Username already registered')
+        if (req2.data?.length) throw DataBaseError.Duplicate('"username""')
         const u = await supabase
             .from('users')
             .insert({ username })
             .select()
         if (u.error) {
-            console.error(u.error)
-            throw new Error(u.error.message)
+            throw new SupabaseError(u.error)
         }
         const [user] = u.data
         const r = await supabase
@@ -132,14 +141,18 @@ export class UserSupabaseModel implements UserModel {
             .eq('id', register_id)
             .select()
         if (r.error) {
-            console.error(r.error)
-            throw new Error(r.error.message)
+            throw new SupabaseError(r.error)
         }
         return user
     }
 
     /**
-     * @throws {Error} Register not found
+     * @description Get register by id
+     * @param {number} id Register id
+     * @returns {Promise<ApiRegister & { password: string }>} Register with password
+     * @throws {DataBaseError} Register not found
+     * @throws {SupabaseError}
+     * @example await getRegister(1)
      */
     async getRegister(id: number): Promise<ApiRegister & { password: string }> {
         const r = await supabase
@@ -147,10 +160,9 @@ export class UserSupabaseModel implements UserModel {
             .select()
             .eq('id', id)
         if (r.error) {
-            console.error(r.error)
-            throw new Error(r.error.message)
+            throw new SupabaseError(r.error)
         }
-        if (!r.data?.length) throw new Error('Register not found')
+        if (!r.data?.length) throw new NotFoundError()
         const [reg] = r.data
         return {
             ...reg,
@@ -159,7 +171,12 @@ export class UserSupabaseModel implements UserModel {
     }
 
     /**
-     * @throws {Error} Username already registered
+     * @description Update user
+     * @param {{id:string,displayname?:string|null,username?:string}} param0 User data to update
+     * @returns {Promise<ApiUser>} Updated user
+     * @throws {DataBaseError} Username already exists
+     * @throws {SupabaseError}
+     * @example await update({ id: 1, username: 'username' })
      */
     async update(
         { id, displayname, username }: { username?: string; displayname?: string | null; id: number },
@@ -170,23 +187,31 @@ export class UserSupabaseModel implements UserModel {
             .eq('id', id)
             .select()
         if (u.error) {
-            if (u.error.message.includes('duplicate key value violates unique constraint')) {
-                throw new Error('Username already registered')
+            if (u.error.message.includes('value violates unique constraint')) {
+                throw DataBaseError.Duplicate('"username"')
             }
-            throw new Error(u.error.message)
+            throw new SupabaseError(u.error)
         }
         const [user] = u.data
         return user
     }
 
+    /**
+     * @description Set user avatar
+     * @param {number} id User id
+     * @param {File} avatar User avatar
+     * @returns {Promise<ApiUser>} Updated user
+     * @throws {SupabaseError}
+     * @throws {StorageError}
+     * @example await setAvatar(1, pngAvatar)
+     */
     async setAvatar(id: number, avatar: File): Promise<ApiUser> {
         const o = await supabase
             .from('users')
             .select()
             .eq('id', id)
         if (o.error) {
-            console.error(o.error)
-            throw new Error(o.error.message)
+            throw new SupabaseError(o.error)
         }
         const [old] = o.data
         if (old.avatar) {
@@ -195,8 +220,7 @@ export class UserSupabaseModel implements UserModel {
                 .from('avatars')
                 .move(old.avatar, `olds/${old.avatar}.png`)
             if (d.error) {
-                console.error(d.error)
-                throw new Error(d.error.message)
+                throw d.error
             }
         }
         const a = await supabase
@@ -204,8 +228,7 @@ export class UserSupabaseModel implements UserModel {
             .from('avatars')
             .upload(`${id}-${Date.now()}.png`, avatar)
         if (a.error) {
-            console.error(a.error)
-            throw new Error(a.error.message)
+            throw a.error
         }
         const u = await supabase
             .from('users')
@@ -213,8 +236,7 @@ export class UserSupabaseModel implements UserModel {
             .eq('id', id)
             .select()
         if (u.error) {
-            console.error(u.error)
-            throw new Error(u.error.message)
+            throw new SupabaseError(u.error)
         }
         const [user] = u.data
         return user

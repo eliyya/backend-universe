@@ -1,3 +1,5 @@
+#!/usr/bin/env -S deno run --allow-read --allow-write --unstable --allow-env --allow-ffi
+
 import db from '@db/sqlite.ts'
 
 let output = ''
@@ -17,7 +19,7 @@ for (const name of names.filter((name) => name !== 'sqlite_sequence')) {
         }\n`
     }
     output += '}\n'
-    console.log('generated interface for table ' + name)
+    console.log('generated type for table ' + name)
 }
 
 Deno.writeFile('./src/db/sqlite.types.ts', new TextEncoder().encode(output), { create: true })

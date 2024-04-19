@@ -15,17 +15,17 @@ app.onError((error, ctx) => {
 })
 
 // IMPORTANT: DON'T TOUCH THIS LINES
+import _0 from './routes/auth.routes.ts'
+app.route('/auth', _0)
+import _1 from './routes/api/users.routes.ts'
+app.route('/api/users', _1)
+import _2 from './routes/api/groups/:id.routes.ts'
+app.route('/api/groups/:id', _2)
+import _3 from './routes/api/users/@me.routes.ts'
+app.route('/api/users/@me', _3)
+import _4 from './routes/api/groups.routes.ts'
+app.route('/api/groups', _4)
+import _5 from './routes/img/avatars.routes.ts'
+app.route('/img/avatars', _5)
 
-import authApi from './routes/auth.routes.ts'
-app.route('/auth', authApi)
-import usersApi from './routes/api/users.routes.ts'
-app.route('/api/users', usersApi)
-import idApi from './routes/api/groups/:id.routes.ts'
-app.route('/api/groups/:id', idApi)
-import meApi from './routes/api/users/@me.routes.ts'
-app.route('/api/users/@me', meApi)
-import groupsApi from './routes/api/groups.routes.ts'
-app.route('/api/groups', groupsApi)
-import avatarsApi from './routes/img/avatars.routes.ts'
-app.route('/img/avatars', avatarsApi)
 Deno.serve(app.fetch)

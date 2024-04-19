@@ -3,20 +3,21 @@ import { compare, hash } from '@utils/hash.ts'
 import db from '@db/sqlite.ts'
 import { UserModel } from '@interfaces/User.ts'
 import { generateToken } from '@utils/token.ts'
-import { TOKEN_TYPES, tTokenType } from '@constants'
+import { TOKEN_TYPES, TokenType } from '@constants'
 import { ApiRegister, ApiUser } from '@apiTypes'
 import { dbRegisters, dbUsers } from '@db/sqlite.types.ts'
+import { NotFoundError } from '@error'
 
 export class UserSqliteModel implements UserModel {
     /**
-     * @throws {Error} Not found
+     * @throws {DataBaseError} Not found
      */
     get(id: number): Promise<ApiUser> {
         const u = db.sql<dbUsers>`
             select * 
             from users 
             where id = ${id}`
-        if (!u.length) throw new Error('Not found')
+        if (!u.length) throw new NotFoundError('User')
         return Promise.resolve(u[0])
     }
 
@@ -29,7 +30,7 @@ export class UserSqliteModel implements UserModel {
     async login(
         email: string,
         password: string,
-    ): Promise<{ token: string; expires: number; type: tTokenType }> {
+    ): Promise<{ token: string; expires: number; type: TokenType }> {
         const [req] = db.sql<dbRegisters>`
             select *
             from registers
