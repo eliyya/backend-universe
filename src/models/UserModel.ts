@@ -1,24 +1,24 @@
 import { z } from '@zod/mod.ts'
 import { compare, hash } from '@utils/hash.ts'
-import supabase from '@db/supabase.ts'
-import { UserModel } from '@interfaces/User.ts'
+import { db } from '@db'
 import { generateToken } from '@utils/token.ts'
 import { TOKEN_TYPES, TokenType } from '@constants'
 import { ApiRegister, ApiUser } from '@apiTypes'
-import { AuthError, DataBaseError, DuplicateError, InvalidTypeError, NotFoundError, SupabaseError } from '@error'
+import { AuthError, DataBaseError, InvalidTypeError, NotFoundError, SupabaseError } from '@error'
+import { generateId } from '@utils/snowflake.ts'
 
-export class UserSupabaseModel implements UserModel {
+export class UserModel {
     /**
      * @description Get user by id
-     * @param {number} id User id
+     * @param {string} id User id
      * @returns {Promise<ApiUser>}
      * @throws {DataBaseError} User not found
      * @throws {SupabaseError}
      * @example await get(1)
      */
-    async get(id: number): Promise<ApiUser> {
-        const user = await supabase
-            .from('users')
+    async get(id: string): Promise<ApiUser> {
+        const user = await db
+            .from('user')
             .select()
             .eq('id', id)
             .single()
@@ -44,9 +44,13 @@ export class UserSupabaseModel implements UserModel {
     async register(email: string, password: string): Promise<ApiRegister> {
         const parsedEmail = z.string().email().safeParse(email)
         if (!parsedEmail.success) throw new InvalidTypeError('email', parsedEmail.error)
-        const r = await supabase
+        const r = await db
             .from('registers')
-            .insert({ email, password: await hash(password) })
+            .insert({ 
+                id: generateId(),
+                email, 
+                password: await hash(password) 
+            })
             .select()
             .single()
         if (r.error) {
@@ -72,7 +76,7 @@ export class UserSupabaseModel implements UserModel {
         email: string,
         password: string,
     ): Promise<{ token: string; expires: number; type: TokenType }> {
-        const req = await supabase
+        const req = await db
             .from('registers')
             .select()
             .eq('email', email)
@@ -102,7 +106,7 @@ export class UserSupabaseModel implements UserModel {
 
     /**
      * @description Create a new user
-     * @param {number} register_id Register id
+     * @param {string} register_id Register id
      * @param {string} username User username
      * @returns {Promise<ApiUser>}
      * @throws {DataBaseError} Register not found
@@ -110,8 +114,8 @@ export class UserSupabaseModel implements UserModel {
      * @throws {SupabaseError}
      * @example await create(1, 'username')
      */
-    async create(register_id: number, username: string): Promise<ApiUser> {
-        const req = await supabase
+    async create(register_id: string, username: string): Promise<ApiUser> {
+        const req = await db
             .from('registers')
             .select()
             .eq('id', register_id)
@@ -119,7 +123,7 @@ export class UserSupabaseModel implements UserModel {
             throw new SupabaseError(req.error)
         }
         if (!req.data?.length) throw new NotFoundError()
-        const req2 = await supabase
+        const req2 = await db
             .from('users')
             .select()
             .eq('username', username)
@@ -127,15 +131,18 @@ export class UserSupabaseModel implements UserModel {
             throw new SupabaseError(req2.error)
         }
         if (req2.data?.length) throw DataBaseError.Duplicate('"username""')
-        const u = await supabase
+        const u = await db
             .from('users')
-            .insert({ username })
+            .insert({ 
+                id: generateId(),
+                username
+             })
             .select()
         if (u.error) {
             throw new SupabaseError(u.error)
         }
         const [user] = u.data
-        const r = await supabase
+        const r = await db
             .from('registers')
             .update({ user_id: user.id })
             .eq('id', register_id)
@@ -148,14 +155,14 @@ export class UserSupabaseModel implements UserModel {
 
     /**
      * @description Get register by id
-     * @param {number} id Register id
+     * @param {string} id Register id
      * @returns {Promise<ApiRegister & { password: string }>} Register with password
      * @throws {DataBaseError} Register not found
      * @throws {SupabaseError}
      * @example await getRegister(1)
      */
-    async getRegister(id: number): Promise<ApiRegister & { password: string }> {
-        const r = await supabase
+    async getRegister(id: string): Promise<ApiRegister & { password: string }> {
+        const r = await db
             .from('registers')
             .select()
             .eq('id', id)
@@ -179,9 +186,9 @@ export class UserSupabaseModel implements UserModel {
      * @example await update({ id: 1, username: 'username' })
      */
     async update(
-        { id, displayname, username }: { username?: string; displayname?: string | null; id: number },
+        { id, displayname, username }: { username?: string; displayname?: string | null; id: string },
     ): Promise<ApiUser> {
-        const u = await supabase
+        const u = await db
             .from('users')
             .update({ displayname, username })
             .eq('id', id)
@@ -190,52 +197,6 @@ export class UserSupabaseModel implements UserModel {
             if (u.error.message.includes('value violates unique constraint')) {
                 throw DataBaseError.Duplicate('"username"')
             }
-            throw new SupabaseError(u.error)
-        }
-        const [user] = u.data
-        return user
-    }
-
-    /**
-     * @description Set user avatar
-     * @param {number} id User id
-     * @param {File} avatar User avatar
-     * @returns {Promise<ApiUser>} Updated user
-     * @throws {SupabaseError}
-     * @throws {StorageError}
-     * @example await setAvatar(1, pngAvatar)
-     */
-    async setAvatar(id: number, avatar: File): Promise<ApiUser> {
-        const o = await supabase
-            .from('users')
-            .select()
-            .eq('id', id)
-        if (o.error) {
-            throw new SupabaseError(o.error)
-        }
-        const [old] = o.data
-        if (old.avatar) {
-            const d = await supabase
-                .storage
-                .from('avatars')
-                .move(old.avatar, `olds/${old.avatar}.png`)
-            if (d.error) {
-                throw d.error
-            }
-        }
-        const a = await supabase
-            .storage
-            .from('avatars')
-            .upload(`${id}-${Date.now()}.png`, avatar)
-        if (a.error) {
-            throw a.error
-        }
-        const u = await supabase
-            .from('users')
-            .update({ avatar: a.data.path })
-            .eq('id', id)
-            .select()
-        if (u.error) {
             throw new SupabaseError(u.error)
         }
         const [user] = u.data

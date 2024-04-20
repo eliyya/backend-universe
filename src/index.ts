@@ -28,4 +28,6 @@ app.route('/api/groups', _4)
 import _5 from './routes/img/avatars.routes.ts'
 app.route('/img/avatars', _5)
 
-Deno.serve(app.fetch)
+Deno.serve({
+    port:+(Deno.env.get('PORT')||'3001')
+},app.fetch)

@@ -2,7 +2,7 @@ import { Database } from './supabase.types.ts'
 import { createClient } from '@supabase'
 import '@dotenv/load.ts'
 
-export default createClient<Database>(
+export const supabase = createClient<Database>(
     Deno.env.get('SUPABASE_URL') as string,
     Deno.env.get('SERVICE_KEY') as string,
     {
@@ -13,3 +13,7 @@ export default createClient<Database>(
         },
     },
 )
+
+export const db = supabase.schema('universe')
+export const storage = supabase.storage.from('universe')
+export * from './supabase.types.ts'

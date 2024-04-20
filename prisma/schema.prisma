@@ -1,0 +1,97 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["universe"]
+}
+
+model users {
+  id            String          @id
+  username      String          @unique
+  displayname   String?
+  groups        groups[]
+  groups_users  groups_users[]
+  classes       classes[]
+  classes_users classes_users[]
+  registers     registers[]
+
+  @@schema("universe")
+}
+
+model registers {
+  id         String   @id
+  created_at DateTime @default(now())
+  email      String
+  password   String
+  user_id    String?
+  user       users?   @relation(fields: [user_id], references: [id])
+
+  @@schema("universe")
+}
+
+model groups {
+  id             String           @id
+  name           String
+  description    String?
+  created_at     DateTime         @default(now())
+  owner          users            @relation(fields: [owner_id], references: [id])
+  owner_id       String
+  groups_users   groups_users[]
+  classes_groups classes_groups[]
+
+  @@schema("universe")
+}
+
+model groups_users {
+  group_id String
+  user_id  String
+  user     users  @relation(fields: [user_id], references: [id])
+  group    groups @relation(fields: [group_id], references: [id])
+
+  @@id([group_id, user_id])
+  @@schema("universe")
+}
+
+model classes {
+  id             String           @id
+  created_at     DateTime         @default(now())
+  name           String
+  subject        String
+  description    String?
+  teacher_id     String
+  teacher        users            @relation(fields: [teacher_id], references: [id])
+  classes_groups classes_groups[]
+  classes_users  classes_users[]
+
+  @@schema("universe")
+}
+
+model classes_groups {
+  class_id String
+  group_id String
+  class    classes @relation(fields: [class_id], references: [id])
+  group    groups  @relation(fields: [group_id], references: [id])
+
+  @@id([class_id, group_id])
+  @@schema("universe")
+}
+
+model classes_users {
+  class_id String
+  user_id  String
+  user     users   @relation(fields: [user_id], references: [id])
+  class    classes @relation(fields: [class_id], references: [id])
+
+  @@id([class_id, user_id])
+  @@schema("universe")
+}

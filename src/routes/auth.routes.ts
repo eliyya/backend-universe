@@ -5,8 +5,7 @@ import { zJSONValidator } from '@middlewares/validators.ts'
 import { captureException } from '@error'
 import { TOKEN_TYPES, TokenType } from '@constants'
 import { decodeToken, generateToken } from '@utils/token.ts'
-import { tUserToken } from '@interfaces/User.ts'
-import { Register } from '@classes/Register.ts'
+import { db } from '@db'
 
 export default new Hono()
     .post(
@@ -35,15 +34,15 @@ export default new Hono()
             return ctx.json({ message: 'Unauthorized' }, 401)
         }
         const [type, token] = authorization.split(' ') as [TokenType, string]
-        const { expires, email, id, created_at } = await decodeToken<tUserToken>(token)
+        const { expires, email, id, created_at } = await decodeToken<any>(token)
         if (expires < Date.now()) {
             return ctx.json({ message: 'Unauthorized' }, 401)
         }
         if (type !== TOKEN_TYPES.Register) {
             return ctx.json({ message: 'Not implemented' }, 500)
         }
-        const user = await (await Register.get(+id)).getUser()
-        if (!user) {
+        const {error, data} = await db.from('registers').select('user (*)').eq('id', id).single()
+        if (error) {
             return ctx.json(
                 await generateToken({
                     email,
@@ -58,7 +57,7 @@ export default new Hono()
                 email,
                 id,
                 created_at,
-                user,
+                user: data?.user,
                 type: TOKEN_TYPES.Bearer,
             }),
         )

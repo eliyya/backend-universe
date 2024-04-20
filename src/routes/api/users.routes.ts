@@ -1,10 +1,10 @@
 import { Hono } from '@hono/mod.ts'
-import { User } from '@classes/User.ts'
 import { decodeToken } from '@utils/token.ts'
-import { tUserToken } from '@interfaces/User.ts'
+
 import { TOKEN_TYPES, TokenType } from '@constants'
 import { zJSONValidator } from '@middlewares/validators.ts'
 import z from '@zod/index.ts'
+import { userController } from '@controller'
 
 const usersApi = new Hono()
 usersApi.post(
@@ -15,7 +15,7 @@ usersApi.post(
     })),
     async (ctx) => {
         const { email, password } = ctx.var.body
-        const x = await User.register(email, password)
+        const x = await userController.register(email, password)
         return ctx.json(x)
     },
 )
@@ -33,12 +33,12 @@ usersApi.post(
         if (type !== TOKEN_TYPES.Register) {
             return ctx.json({ message: 'Unauthorized' }, 401)
         }
-        const { expires, id } = await decodeToken<tUserToken>(token)
+        const { expires, id } = await decodeToken<any>(token)
         if (expires < Date.now()) {
             return ctx.json({ message: 'Unauthorized' }, 401)
         }
         const { username } = ctx.var.body
-        const x = await User.create(+id, username)
+        const x = await userController.create(id, username)
         return ctx.json(x)
     },
 )
@@ -49,7 +49,7 @@ usersApi.get('/:id', async (ctx, next) => {
     if (id === '@me') {
         return await next()
     }
-    const x = await User.get(+id)
+    const x = await userController.get(id)
     return ctx.json(x)
 })
 

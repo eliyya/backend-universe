@@ -1,8 +1,7 @@
 import { type MiddlewareHandler } from '@hono/mod.ts'
-import { type tUserToken } from '@interfaces/User.ts'
+
 import { decodeToken } from '@utils/token.ts'
 import { captureException } from '@error'
-import { User } from '@classes/User.ts'
 import { TOKEN_TYPES, TokenType } from '@constants'
 
 export const auth: MiddlewareHandler<{ Variables: { user: User } }> = async (

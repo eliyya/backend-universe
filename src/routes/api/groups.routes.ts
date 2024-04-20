@@ -20,7 +20,7 @@ groupsApi.post(
     })),
     async (ctx) => {
         const { name, description } = await ctx.req.json()
-        const group = await groupController.create({ name, description, owner_id: +ctx.var.user.id })
+        const group = await groupController.create({ name, description, owner_id: ctx.var.user.id })
         return ctx.json(group)
     },
 )

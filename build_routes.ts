@@ -24,6 +24,6 @@ for (const file of [...walkSync('src/routes', { exts: ['ts'], includeDirs: false
     }', _${ifile++})`
 }
 
-newContent += '\n\nDeno.serve(app.fetch)'
+newContent += '\n\nDeno.serve({\n    port:+(Deno.env.get(\'PORT\')||\'3001\')\n},app.fetch)'
 await Deno.writeTextFile(indexFilePath, newContent)
 console.log('El archivo index.ts ha sido actualizado con las importaciones y rutas.')
